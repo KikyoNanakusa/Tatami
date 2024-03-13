@@ -141,8 +141,15 @@
     <ClInclude Include="definition.h" />
     <ClInclude Include="HotkeyManager.h" />
     <ClInclude Include="MonitorUtils.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="WindowActions.h" />
     <ClInclude Include="WindowManager.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="VimHotkeyWindowManager.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="vim_hotkey.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

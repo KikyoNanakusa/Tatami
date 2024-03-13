@@ -4,6 +4,7 @@
 #include "WindowManager.h"
 #include "HotkeyManager.h"
 #include "WindowActions.h"
+#include "resource.h"
 
 
 HMENU hMenu;
@@ -20,7 +21,7 @@ void InitTaskIcon(HWND hWnd) {
 	nid.uID = 1;
 	nid.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
 	nid.uCallbackMessage = WM_NOTIFICATION;
-	nid.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+	nid.hIcon = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICON1));
 	lstrcpy(nid.szTip, TEXT("VimHotkeyWindowManager"));
 	Shell_NotifyIcon(NIM_ADD, &nid);
 }
