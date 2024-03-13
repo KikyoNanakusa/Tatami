@@ -1,54 +1,32 @@
 #include <Windows.h>
 
 #define WM_NOTIFYCATION (WM_USER + 100)
+#define HOTKEY_LEFT 1
+#define HOTKEY_DOWN 2
+#define HOTKEY_UP 3
+#define HOTKEY_RIGHT 4
+#define MENU_ACTIVATE 0x1
+#define MENU_EXIT 0x2
 
 HMENU hMenu;
 NOTIFYICONDATA nid;
 
-LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+
+bool OnDestroy(HWND hWnd)
 {
-	POINT point;
+	// Unregister hotkey
+	UnregisterHotKey(hWnd, HOTKEY_LEFT);
+	UnregisterHotKey(hWnd, HOTKEY_UP);
+	UnregisterHotKey(hWnd, HOTKEY_DOWN);
+	UnregisterHotKey(hWnd, HOTKEY_RIGHT);
 
-	switch (message)
-	{
-	case WM_CREATE:
-		// Register hotkey
-		RegisterHotKey(hWnd, 1, MOD_WIN | MOD_SHIFT, 'H');
-		RegisterHotKey(hWnd, 2, MOD_WIN | MOD_SHIFT, 'J');
-		RegisterHotKey(hWnd, 3, MOD_WIN | MOD_SHIFT, 'K');
-		RegisterHotKey(hWnd, 4, MOD_WIN | MOD_SHIFT, 'L');
-
-		// Create context menu
-		hMenu = CreatePopupMenu();
-		AppendMenu(hMenu, MF_STRING, 1, TEXT("Item 1"));
-		AppendMenu(hMenu, MF_STRING, 2, TEXT("Item 2"));
-		break;
-	case WM_HOTKEY:
-		// Send notification to the main window
-		break;
-	case WM_CONTEXTMENU:
-		break;
-	case WM_NOTIFYCATION:
-		switch (lParam)
-		{
-			case WM_RBUTTONDOWN:
-				GetCursorPos(&point);
-				TrackPopupMenu(hMenu, TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, 0, hWnd, NULL);
-				break;
-		}
-		break;
-	case WM_DESTROY:
-		// Unregister hotkey
-		UnregisterHotKey(hWnd, 1);
-		DestroyWindow(hWnd);
-		Shell_NotifyIcon(NIM_DELETE, &nid);
-		DestroyMenu(hMenu);
-		PostQuitMessage(0);
-		break;
-	default:
-		return DefWindowProc(hWnd, message, wParam, lParam);
-	}
-	return 0;
+	// Destroy window
+	DestroyWindow(hWnd);
+	Shell_NotifyIcon(NIM_DELETE, &nid);
+	DestroyMenu(hMenu);
+	PostQuitMessage(0);
+	return true;
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
@@ -85,6 +63,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	);
 	
 	//タスクトレイにアイコンを追加
+	ZeroMemory(&nid, sizeof(nid));
 	nid.cbSize = sizeof(NOTIFYICONDATA);
 	nid.hWnd = hWnd;
 	nid.uID = 1;
@@ -100,4 +79,58 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
+}
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	POINT point;
+
+	switch (message)
+	{
+	case WM_CREATE:
+		// Register hotkey
+		RegisterHotKey(hWnd, HOTKEY_LEFT, MOD_WIN | MOD_SHIFT, 'H');
+		RegisterHotKey(hWnd, HOTKEY_DOWN, MOD_WIN | MOD_SHIFT, 'J');
+		RegisterHotKey(hWnd, HOTKEY_UP, MOD_WIN | MOD_SHIFT, 'K');
+		RegisterHotKey(hWnd, HOTKEY_RIGHT, MOD_WIN | MOD_SHIFT, 'L');
+
+		// Create context menu
+		hMenu = CreatePopupMenu();
+		AppendMenu(hMenu, MF_STRING, MENU_ACTIVATE, TEXT("有効無効切り替え"));
+		AppendMenu(hMenu, MF_STRING, MENU_EXIT, TEXT("終了"));
+		break;
+	case WM_HOTKEY:
+		// Send notification to the main window
+		break;
+	case WM_CONTEXTMENU:
+		break;
+	case WM_NOTIFYCATION:
+		switch (lParam)
+		{
+			case WM_RBUTTONDOWN:
+				//NOTE:SetForegroundWindow() is required to delete the context menu
+				SetForegroundWindow(hWnd);
+				GetCursorPos(&point);
+				int cmd = TrackPopupMenu(hMenu, TPM_LEFTALIGN | TPM_RIGHTBUTTON | TPM_RETURNCMD, point.x, point.y, 0, hWnd, NULL);
+				SendMessage(hWnd, WM_COMMAND, cmd, 0);
+				break;
+		}
+		break;
+	case WM_COMMAND:
+		switch (LOWORD(wParam))
+		{
+		case MENU_EXIT:
+			PostQuitMessage(0);
+			break;
+		case MENU_ACTIVATE:
+			MessageBox(hWnd, TEXT("Item 2"), TEXT("Menu"), MB_OK);
+			break;
+		}
+		break;
+	case WM_DESTROY:
+		OnDestroy(hWnd);
+		break;
+	default:
+		return DefWindowProc(hWnd, message, wParam, lParam);
+	}
+	return 0;
 }
