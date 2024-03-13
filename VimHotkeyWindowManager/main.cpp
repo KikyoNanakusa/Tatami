@@ -11,6 +11,8 @@
 #define MENU_ACTIVATE 0x1
 #define MENU_EXIT 0x2
 
+#define NO_MINIMIZED_WINDOW 0x002
+
 HMENU hMenu;
 NOTIFYICONDATA nid;
 HWND minimizedWindow = NULL;
@@ -83,46 +85,42 @@ void RegisterHotKeys(HWND hWnd) {
 	RegisterHotKey(hWnd, HOTKEY_RESTORE, MOD_WIN | MOD_SHIFT, 'U');
 }
 
+bool minimizeWindow(HWND hWnd) {
+    minimizedWindow = hWnd;
+    return ShowWindow(hWnd, SW_MINIMIZE);
+}
+
+bool restoreWindow() {
+    if (minimizedWindow == NULL) return NO_MINIMIZED_WINDOW;
+    bool ret = ShowWindow(minimizedWindow, SW_RESTORE);
+    minimizedWindow = NULL;
+    return ret;
+}
+
 bool moveFocusedWindow(int moveType) {
-	//フォーカスされているウィンドウを取得
     HWND hWnd = GetForegroundWindow();
     if (hWnd == NULL) return false;
 
+    if (moveType == HOTKEY_MINIMIZE) {
+        return minimizeWindow(hWnd);
+    } else if (moveType == HOTKEY_RESTORE) {
+        return restoreWindow();
+    }
+
     // ウィンドウがあるモニターの情報を取得
-    HMONITOR hMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
     MONITORINFO mi = { sizeof(mi) };
-    if (!GetMonitorInfo(hMonitor, &mi)) return false;
+    if (!GetMonitorInfo(MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST), &mi)) return false;
 
     // ウィンドウの位置とサイズを取得
     RECT rect;
     GetWindowRect(hWnd, &rect);
-    int windowWidth = rect.right - rect.left;
-    int windowHeight = rect.bottom - rect.top;
-
-    int newX = rect.left;
-    int newY = rect.top;
+    int newX = rect.left, newY = rect.top;
 
     switch (moveType) {
-        case HOTKEY_LEFT:
-            newX = mi.rcWork.left;
-            break;
-        case HOTKEY_RIGHT:
-            newX = mi.rcWork.right - windowWidth;
-            break;
-        case HOTKEY_DOWN:
-            newY = mi.rcWork.bottom - windowHeight;
-            break;
-        case HOTKEY_UP:
-            newY = mi.rcWork.top;
-            break;
-		case HOTKEY_MINIMIZE:
-			minimizedWindow = hWnd;
-			return ShowWindow(hWnd, SW_MINIMIZE);
-		case HOTKEY_RESTORE:
-			if (minimizedWindow == NULL) return true;
-			bool ret = ShowWindow(minimizedWindow, SW_RESTORE);
-			minimizedWindow = NULL;
-			return ret;
+        case HOTKEY_LEFT: newX = mi.rcWork.left; break;
+        case HOTKEY_RIGHT: newX = mi.rcWork.right - (rect.right - rect.left); break;
+        case HOTKEY_DOWN: newY = mi.rcWork.bottom - (rect.bottom - rect.top); break;
+        case HOTKEY_UP: newY = mi.rcWork.top; break;
     }
 
     // ウィンドウを新しい位置に移動
