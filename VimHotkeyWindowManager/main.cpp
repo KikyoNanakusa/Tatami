@@ -29,11 +29,7 @@ bool OnDestroy(HWND hWnd)
 	return true;
 }
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
-{
-	HWND hWnd;
-	MSG msg;
-
+HWND InitWindow(HINSTANCE hInstance) {
 	// Create window
 	WNDCLASS wc;
 	wc.style = 0;
@@ -47,8 +43,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	wc.lpszMenuName = NULL;
 	wc.lpszClassName = TEXT("VimHotkeyWindowManager");
 	RegisterClass(&wc);
-
-	hWnd = CreateWindow(
+	return CreateWindow(
 		TEXT("VimHotkeyWindowManager"),
 		TEXT("VimHotkeyWindowManager"),
 		WS_OVERLAPPEDWINDOW,
@@ -61,8 +56,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		hInstance,
 		NULL
 	);
-	
-	//タスクトレイにアイコンを追加
+}
+
+void InitTaskIcon(HWND hWnd) {
 	ZeroMemory(&nid, sizeof(nid));
 	nid.cbSize = sizeof(NOTIFYICONDATA);
 	nid.hWnd = hWnd;
@@ -72,6 +68,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	nid.hIcon = LoadIcon(NULL, IDI_APPLICATION);
 	lstrcpy(nid.szTip, TEXT("VimHotkeyWindowManager"));
 	Shell_NotifyIcon(NIM_ADD, &nid);
+}
+
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+{
+	HWND hWnd;
+	MSG msg;
+
+	//ウィンドウを初期化
+	hWnd = InitWindow(hInstance);
+
+	//タスクトレイにアイコンを追加
+	InitTaskIcon(hWnd);
 
 	//Message loop
 	while (GetMessage(&msg, NULL, 0, 0))
@@ -80,6 +88,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		DispatchMessage(&msg);
 	}
 }
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	POINT point;
@@ -119,10 +128,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		switch (LOWORD(wParam))
 		{
 		case MENU_EXIT:
+			OnDestroy(hWnd);
 			PostQuitMessage(0);
 			break;
 		case MENU_ACTIVATE:
-			MessageBox(hWnd, TEXT("Item 2"), TEXT("Menu"), MB_OK);
+			//TODO:有効無効の切り替えを実装する
+			MessageBox(hWnd, TEXT("TODO:有効無効の切り替えを実装する"), TEXT("Menu"), MB_OK);
 			break;
 		}
 		break;
