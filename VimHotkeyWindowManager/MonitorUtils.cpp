@@ -32,6 +32,24 @@ HMONITOR GetNextMonitor(HWND hWnd) {
     return NULL; // 次のモニターが見つからなかった場合
 }
 
+HMONITOR GetPreviousMonitor(HWND hWnd) {
+    // すべてのモニターの情報を取得
+    std::vector<MonitorInfo> monitors;
+    EnumDisplayMonitors(NULL, NULL, MonitorEnumProc, (LPARAM)&monitors);
+
+    // hWndが現在表示されているモニターを見つける
+    HMONITOR hCurrentMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+    for (size_t i = 0; i < monitors.size(); ++i) {
+        if (monitors[i].hMonitor == hCurrentMonitor) {
+            // 前のモニターのインデックスを計算（0の場合はラップアラウンド）
+            size_t prevIndex = (i == 0) ? monitors.size() - 1 : i - 1;
+            return monitors[prevIndex].hMonitor;
+        }
+    }
+
+    return NULL; // 前のモニターが見つからなかった場合
+}
+
 int GetMonitorCenter(MONITORINFO mi) {
 	return (mi.rcWork.left + mi.rcWork.right) / 2;
 }

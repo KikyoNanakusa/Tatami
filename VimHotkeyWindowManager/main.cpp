@@ -54,6 +54,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		// Register hotkey
 		RegisterHotKeys(hWnd);
 
+
 		// Create context menu
 		hMenu = CreatePopupMenu();
 		AppendMenu(hMenu, MF_STRING, MENU_ACTIVATE, TEXT("—LŒø–³ŒøØ‚è‘Ö‚¦"));

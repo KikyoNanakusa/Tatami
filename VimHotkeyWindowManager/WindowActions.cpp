@@ -65,34 +65,37 @@ std::pair<int, int> CalculateDpiAdjustedSize(HWND hwnd, const RECT& windowRect, 
     float scalingFactorY = static_cast<float>(dpiYDst) / dpiYSrc;
 
     // スケーリングされたサイズを計算
-    int scaledWidth = static_cast<int>((windowRect.right - windowRect.left) * scalingFactorX);
-    int scaledHeight = static_cast<int>((windowRect.bottom - windowRect.top) * scalingFactorY);
+    int scaledWidth = static_cast<int>((windowRect.right - windowRect.left) / scalingFactorX);
+    int scaledHeight = static_cast<int>((windowRect.bottom - windowRect.top) / scalingFactorY);
 
     return std::make_pair(scaledWidth, scaledHeight);
 }
 
-bool MoveWindowToOtherMonitor(HWND hwnd, const MONITORINFO& mi, const RECT& windowRect, bool isMoveWindowLeft) {
-    HMONITOR hNextMonitor = GetNextMonitor(hwnd);
-	if (hNextMonitor == NULL) return false;
+bool MoveWindowToOtherMonitor(HWND hwnd, const MONITORINFO& mi, const RECT& windowRect, bool isMoveWindowNextMonitor) {
+    HMONITOR hTargetMonitor = NULL;
+    if (isMoveWindowNextMonitor) {
+		hTargetMonitor = GetNextMonitor(hwnd);
+		if (hTargetMonitor == NULL) return false;
+    }
+    else {
+		hTargetMonitor = GetPreviousMonitor(hwnd);
+		if (hTargetMonitor == NULL) return false;
+	}
 
 	MONITORINFO miNext = { sizeof(miNext) };
-	if (!GetMonitorInfo(hNextMonitor, &miNext)) return false;
+	if (!GetMonitorInfo(hTargetMonitor, &miNext)) return false;
 
     std::pair<int, int> newSize = CalculateNewSizeForMonitor(windowRect, mi, miNext);
-    //std::pair<int, int> newSize = CalculateDpiAdjustedSize(hwnd, windowRect, hNextMonitor);
+    //newSize = CalculateDpiAdjustedSize(hwnd, windowRect, hNextMonitor);
 
-    int newLeft;
-    if (isMoveWindowLeft) {
-        newLeft = miNext.rcWork.left;
-    } else {
-        newLeft = miNext.rcWork.right - newSize.first - miNext.rcWork.left;
-    }
-
+    //int newLeft = miNext.rcWork.left + (miNext.rcWork.right - newSize.first) / 2;
+    int newLeft = miNext.rcWork.left;
+    
 	return SetWindowPos(hwnd, NULL, newLeft, miNext.rcWork.top, newSize.first, newSize.second, SWP_NOZORDER);
 }
 
 bool MoveWindowToLeft(HWND hWnd, const MONITORINFO& mi, const RECT& windowRect) {
-    // ウィンドウがモニターの左端にある場合、次のモニターに移動
+    // ウィンドウがモニターの左端にある場合、前のモニターに移動
     if (windowRect.left <= mi.rcWork.left) return MoveWindowToOtherMonitor(hWnd, mi, windowRect, false);
     return AdjustWindowPosition(hWnd, mi, windowRect, false); // 左側へ移動
 }
