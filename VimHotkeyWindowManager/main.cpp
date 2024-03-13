@@ -78,30 +78,41 @@ void RegisterHotKeys(HWND hWnd) {
 }
 
 bool moveFocusedWindow(int moveType) {
-	HWND hWnd = GetForegroundWindow();
-	if (hWnd == NULL) return false;
+	//フォーカスされているウィンドウを取得
+    HWND hWnd = GetForegroundWindow();
+    if (hWnd == NULL) return false;
 
-	// 画面の解像度を取得
-	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
-	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+    // ウィンドウがあるモニターの情報を取得
+    HMONITOR hMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+    MONITORINFO mi = { sizeof(mi) };
+    if (!GetMonitorInfo(hMonitor, &mi)) return false;
 
-	// ウィンドウの位置とサイズを取得
-	RECT rect;
-	GetWindowRect(hWnd, &rect);
-	int windowWidth = rect.right - rect.left;
-	int windowHeight = rect.bottom - rect.top;
+    // ウィンドウの位置とサイズを取得
+    RECT rect;
+    GetWindowRect(hWnd, &rect);
+    int windowWidth = rect.right - rect.left;
+    int windowHeight = rect.bottom - rect.top;
 
-	switch (moveType) {
-		case HOTKEY_LEFT:
-			return SetWindowPos(hWnd, NULL, 0, rect.top, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-		case HOTKEY_RIGHT:
-			return SetWindowPos(hWnd, NULL, screenWidth - windowWidth, rect.top, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-		case HOTKEY_DOWN:
-			return SetWindowPos(hWnd, NULL, rect.left, screenHeight - windowHeight, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-		case HOTKEY_UP:
-			return SetWindowPos(hWnd, NULL, rect.left, 0, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-	}
-	return true;
+    int newX = rect.left;
+    int newY = rect.top;
+
+    switch (moveType) {
+        case HOTKEY_LEFT:
+            newX = mi.rcWork.left;
+            break;
+        case HOTKEY_RIGHT:
+            newX = mi.rcWork.right - windowWidth;
+            break;
+        case HOTKEY_DOWN:
+            newY = mi.rcWork.bottom - windowHeight;
+            break;
+        case HOTKEY_UP:
+            newY = mi.rcWork.top;
+            break;
+    }
+
+    // ウィンドウを新しい位置に移動
+    return SetWindowPos(hWnd, NULL, newX, newY, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
