@@ -70,6 +70,40 @@ void InitTaskIcon(HWND hWnd) {
 	Shell_NotifyIcon(NIM_ADD, &nid);
 }
 
+void RegisterHotKeys(HWND hWnd) {
+	RegisterHotKey(hWnd, HOTKEY_LEFT, MOD_WIN | MOD_SHIFT, 'H');
+	RegisterHotKey(hWnd, HOTKEY_DOWN, MOD_WIN | MOD_SHIFT, 'J');
+	RegisterHotKey(hWnd, HOTKEY_UP, MOD_WIN | MOD_SHIFT, 'K');
+	RegisterHotKey(hWnd, HOTKEY_RIGHT, MOD_WIN | MOD_SHIFT, 'L');
+}
+
+bool moveFocusedWindow(int moveType) {
+	HWND hWnd = GetForegroundWindow();
+	if (hWnd == NULL) return false;
+
+	// 画面の解像度を取得
+	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+
+	// ウィンドウの位置とサイズを取得
+	RECT rect;
+	GetWindowRect(hWnd, &rect);
+	int windowWidth = rect.right - rect.left;
+	int windowHeight = rect.bottom - rect.top;
+
+	switch (moveType) {
+		case HOTKEY_LEFT:
+			return SetWindowPos(hWnd, NULL, 0, rect.top, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+		case HOTKEY_RIGHT:
+			return SetWindowPos(hWnd, NULL, screenWidth - windowWidth, rect.top, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+		case HOTKEY_DOWN:
+			return SetWindowPos(hWnd, NULL, rect.left, screenHeight - windowHeight, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+		case HOTKEY_UP:
+			return SetWindowPos(hWnd, NULL, rect.left, 0, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+	}
+	return true;
+}
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	HWND hWnd;
@@ -97,10 +131,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 	case WM_CREATE:
 		// Register hotkey
-		RegisterHotKey(hWnd, HOTKEY_LEFT, MOD_WIN | MOD_SHIFT, 'H');
-		RegisterHotKey(hWnd, HOTKEY_DOWN, MOD_WIN | MOD_SHIFT, 'J');
-		RegisterHotKey(hWnd, HOTKEY_UP, MOD_WIN | MOD_SHIFT, 'K');
-		RegisterHotKey(hWnd, HOTKEY_RIGHT, MOD_WIN | MOD_SHIFT, 'L');
+		RegisterHotKeys(hWnd);
 
 		// Create context menu
 		hMenu = CreatePopupMenu();
@@ -109,6 +140,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_HOTKEY:
 		// Send notification to the main window
+		moveFocusedWindow(wParam);
 		break;
 	case WM_CONTEXTMENU:
 		break;
