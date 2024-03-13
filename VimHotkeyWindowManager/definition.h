@@ -1,5 +1,5 @@
 #pragma once
-#define WM_NOTIFYCATION (WM_USER + 100)
+#define WM_NOTIFICATION (WM_USER + 100)
 #define HOTKEY_LEFT 1
 #define HOTKEY_DOWN 2
 #define HOTKEY_UP 3

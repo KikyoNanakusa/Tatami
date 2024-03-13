@@ -59,19 +59,19 @@ void InitTaskIcon(HWND hWnd) {
 	nid.hWnd = hWnd;
 	nid.uID = 1;
 	nid.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
-	nid.uCallbackMessage = WM_NOTIFYCATION;
+	nid.uCallbackMessage = WM_NOTIFICATION;
 	nid.hIcon = LoadIcon(NULL, IDI_APPLICATION);
 	lstrcpy(nid.szTip, TEXT("VimHotkeyWindowManager"));
 	Shell_NotifyIcon(NIM_ADD, &nid);
 }
 
 void RegisterHotKeys(HWND hWnd) {
-	RegisterHotKey(hWnd, HOTKEY_LEFT, MOD_WIN | MOD_SHIFT, 'H');
-	RegisterHotKey(hWnd, HOTKEY_DOWN, MOD_WIN | MOD_SHIFT, 'J');
-	RegisterHotKey(hWnd, HOTKEY_UP, MOD_WIN | MOD_SHIFT, 'K');
-	RegisterHotKey(hWnd, HOTKEY_RIGHT, MOD_WIN | MOD_SHIFT, 'L');
-	RegisterHotKey(hWnd, HOTKEY_MINIMIZE, MOD_WIN | MOD_SHIFT, 'D');
-	RegisterHotKey(hWnd, HOTKEY_RESTORE, MOD_WIN | MOD_SHIFT, 'U');
+	RegisterHotKey(hWnd, HOTKEY_LEFT, MOD_ALT | MOD_SHIFT, 'H');
+	RegisterHotKey(hWnd, HOTKEY_DOWN, MOD_ALT | MOD_SHIFT, 'J');
+	RegisterHotKey(hWnd, HOTKEY_UP, MOD_ALT | MOD_SHIFT, 'K');
+	RegisterHotKey(hWnd, HOTKEY_RIGHT, MOD_ALT | MOD_SHIFT, 'L');
+	RegisterHotKey(hWnd, HOTKEY_MINIMIZE, MOD_ALT | MOD_SHIFT, 'D');
+	RegisterHotKey(hWnd, HOTKEY_RESTORE, MOD_ALT | MOD_SHIFT, 'U');
 }
 
 bool minimizeWindow(HWND hWnd) {
@@ -156,7 +156,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_CONTEXTMENU:
 		break;
-	case WM_NOTIFYCATION:
+	case WM_NOTIFICATION:
 		switch (lParam)
 		{
 			case WM_RBUTTONDOWN:
