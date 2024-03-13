@@ -31,3 +31,15 @@ HMONITOR GetNextMonitor(HWND hWnd) {
 
     return NULL; // Ÿ‚Ìƒ‚ƒjƒ^[‚ªŒ©‚Â‚©‚ç‚È‚©‚Á‚½ê‡
 }
+
+int GetMonitorCenter(MONITORINFO mi) {
+	return (mi.rcWork.left + mi.rcWork.right) / 2;
+}
+
+int GetMonitorWorkWidth(MONITORINFO mi) {
+	return mi.rcWork.right - mi.rcWork.left;
+}
+
+int GetMonitorWorkHeight(MONITORINFO mi) {
+	return mi.rcWork.bottom - mi.rcWork.top;
+}
