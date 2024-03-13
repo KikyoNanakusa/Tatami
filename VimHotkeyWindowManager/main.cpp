@@ -2,8 +2,13 @@
 
 #define WM_NOTIFYCATION (WM_USER + 100)
 
+HMENU hMenu;
+NOTIFYICONDATA nid;
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+	POINT point;
+
 	switch (message)
 	{
 	case WM_CREATE:
@@ -12,16 +17,32 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		RegisterHotKey(hWnd, 2, MOD_WIN | MOD_SHIFT, 'J');
 		RegisterHotKey(hWnd, 3, MOD_WIN | MOD_SHIFT, 'K');
 		RegisterHotKey(hWnd, 4, MOD_WIN | MOD_SHIFT, 'L');
+
+		// Create context menu
+		hMenu = CreatePopupMenu();
+		AppendMenu(hMenu, MF_STRING, 1, TEXT("Item 1"));
+		AppendMenu(hMenu, MF_STRING, 2, TEXT("Item 2"));
 		break;
 	case WM_HOTKEY:
 		// Send notification to the main window
 		break;
+	case WM_CONTEXTMENU:
+		break;
 	case WM_NOTIFYCATION:
-		// Do something
+		switch (lParam)
+		{
+			case WM_RBUTTONDOWN:
+				GetCursorPos(&point);
+				TrackPopupMenu(hMenu, TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, 0, hWnd, NULL);
+				break;
+		}
 		break;
 	case WM_DESTROY:
 		// Unregister hotkey
 		UnregisterHotKey(hWnd, 1);
+		DestroyWindow(hWnd);
+		Shell_NotifyIcon(NIM_DELETE, &nid);
+		DestroyMenu(hMenu);
 		PostQuitMessage(0);
 		break;
 	default:
@@ -64,7 +85,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	);
 	
 	//タスクトレイにアイコンを追加
-	NOTIFYICONDATA nid;
 	nid.cbSize = sizeof(NOTIFYICONDATA);
 	nid.hWnd = hWnd;
 	nid.uID = 1;
