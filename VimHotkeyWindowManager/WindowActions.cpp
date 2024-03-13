@@ -31,11 +31,75 @@ bool AdjustWindowPosition(HWND hWnd, const MONITORINFO& mi, const RECT& windowRe
     return SetWindowPos(hWnd, NULL, newX, newY, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
 }
 
+std::pair<int, int> CalculateNewSizeForMonitor(const RECT& windowRect, const MONITORINFO& originMonitorInfo, const MONITORINFO& nextMonitorInfo) {
+    int windowWidth = windowRect.right - windowRect.left;
+    int windowHeight = windowRect.bottom - windowRect.top;
+
+    int origMonitorWidth = GetMonitorWorkWidth(originMonitorInfo);
+    int origMonitorHeight = GetMonitorWorkHeight(originMonitorInfo);
+
+    int nextMonitorWidth = GetMonitorWorkWidth(nextMonitorInfo);
+    int nextMonitorHeight = GetMonitorWorkHeight(nextMonitorInfo);
+
+    float widthRatio = static_cast<float>(nextMonitorWidth) / origMonitorWidth;
+    float heightRatio = static_cast<float>(nextMonitorHeight) / origMonitorHeight;
+
+    int newWidth = static_cast<int>(windowWidth * widthRatio);
+    int newHeight = static_cast<int>(windowHeight * heightRatio);
+
+    return std::make_pair(newWidth, newHeight);
+}
+
+std::pair<int, int> CalculateDpiAdjustedSize(HWND hwnd, const RECT& windowRect, HMONITOR hDstMonitor) {
+    // 移動元モニターのDPIを取得
+    HMONITOR hSrcMonitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
+    UINT dpiXSrc, dpiYSrc;
+    GetDpiForMonitor(hSrcMonitor, MDT_EFFECTIVE_DPI, &dpiXSrc, &dpiYSrc);
+
+    // 移動先モニターのDPIを取得
+    UINT dpiXDst, dpiYDst;
+    GetDpiForMonitor(hDstMonitor, MDT_EFFECTIVE_DPI, &dpiXDst, &dpiYDst);
+
+    // DPIスケーリング比を計算
+    float scalingFactorX = static_cast<float>(dpiXDst) / dpiXSrc;
+    float scalingFactorY = static_cast<float>(dpiYDst) / dpiYSrc;
+
+    // スケーリングされたサイズを計算
+    int scaledWidth = static_cast<int>((windowRect.right - windowRect.left) * scalingFactorX);
+    int scaledHeight = static_cast<int>((windowRect.bottom - windowRect.top) * scalingFactorY);
+
+    return std::make_pair(scaledWidth, scaledHeight);
+}
+
+bool MoveWindowToOtherMonitor(HWND hwnd, const MONITORINFO& mi, const RECT& windowRect, bool isMoveWindowLeft) {
+    HMONITOR hNextMonitor = GetNextMonitor(hwnd);
+	if (hNextMonitor == NULL) return false;
+
+	MONITORINFO miNext = { sizeof(miNext) };
+	if (!GetMonitorInfo(hNextMonitor, &miNext)) return false;
+
+    std::pair<int, int> newSize = CalculateNewSizeForMonitor(windowRect, mi, miNext);
+    //std::pair<int, int> newSize = CalculateDpiAdjustedSize(hwnd, windowRect, hNextMonitor);
+
+    int newLeft;
+    if (isMoveWindowLeft) {
+        newLeft = miNext.rcWork.left;
+    } else {
+        newLeft = miNext.rcWork.right - newSize.first - miNext.rcWork.left;
+    }
+
+	return SetWindowPos(hwnd, NULL, newLeft, miNext.rcWork.top, newSize.first, newSize.second, SWP_NOZORDER);
+}
+
 bool MoveWindowToLeft(HWND hWnd, const MONITORINFO& mi, const RECT& windowRect) {
+    // ウィンドウがモニターの左端にある場合、次のモニターに移動
+    if (windowRect.left <= mi.rcWork.left) return MoveWindowToOtherMonitor(hWnd, mi, windowRect, false);
     return AdjustWindowPosition(hWnd, mi, windowRect, false); // 左側へ移動
 }
 
 bool MoveWindowToRight(HWND hWnd, const MONITORINFO& mi, const RECT& windowRect) {
+    // ウィンドウがモニターの右端にある場合、次のモニターに移動
+    if (windowRect.right >= mi.rcWork.right) return MoveWindowToOtherMonitor(hWnd, mi, windowRect, true);
     return AdjustWindowPosition(hWnd, mi, windowRect, true); // 右側へ移動
 }
 
@@ -65,7 +129,6 @@ bool MoveFocusedWindow(int moveType, HWND minimizedWindow) {
 				rect.left, mi.rcWork.bottom - (rect.bottom - rect.top), 0, 0, SWP_NOSIZE | SWP_NOZORDER);
         case HOTKEY_UP: 
 			return SetWindowPos(hWnd, NULL, rect.left, mi.rcWork.top, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-		default: return false;
+		default: return UNKNOWN_HOTKEY;
     }
-
 }

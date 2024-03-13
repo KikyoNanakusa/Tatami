@@ -11,3 +11,5 @@
 #define MENU_EXIT 0x2
 
 #define NO_MINIMIZED_WINDOW 0x002
+
+#define UNKNOWN_HOTKEY 0x2
