@@ -6,6 +6,7 @@
 #define HOTKEY_RIGHT 4
 #define HOTKEY_MINIMIZE 5
 #define HOTKEY_RESTORE 6
+#define HOTKEY_MAXIMIZE 7
 
 #define MENU_ACTIVATE 0x1
 #define MENU_EXIT 0x2

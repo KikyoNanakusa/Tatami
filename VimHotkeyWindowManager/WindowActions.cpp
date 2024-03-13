@@ -1,11 +1,11 @@
 #include "WindowActions.h"
 
-bool minimizeWindow(HWND hWnd, HWND minimizedWindow) {
+bool minimizeWindow(HWND hWnd, HWND& minimizedWindow) {
     minimizedWindow = hWnd;
     return ShowWindow(hWnd, SW_MINIMIZE);
 }
 
-bool restoreWindow(HWND minimizedWindow) {
+bool restoreWindow(HWND& minimizedWindow) {
     if (minimizedWindow == NULL) return NO_MINIMIZED_WINDOW;
     bool ret = ShowWindow(minimizedWindow, SW_RESTORE);
     minimizedWindow = NULL;
@@ -94,19 +94,41 @@ bool MoveWindowToOtherMonitor(HWND hwnd, const MONITORINFO& mi, const RECT& wind
 	return SetWindowPos(hwnd, NULL, newLeft, miNext.rcWork.top, newSize.first, newSize.second, SWP_NOZORDER);
 }
 
+bool MoveMaximizedWindow(HWND hWnd, const MONITORINFO& mi, bool isMoveToLeft) {
+    ShowWindow(hWnd, SW_RESTORE);
+    int monitorWidth = GetMonitorWorkWidth(mi);
+    int monitorHeight = GetMonitorWorkHeight(mi);
+    if (isMoveToLeft) {
+        return SetWindowPos(hWnd, NULL, mi.rcWork.left, mi.rcWork.top, monitorWidth / 2, monitorHeight, SWP_NOZORDER);
+    }
+    else {
+		return SetWindowPos(hWnd, NULL, mi.rcWork.left + monitorWidth / 2, mi.rcWork.top, monitorWidth / 2, monitorHeight, SWP_NOZORDER);
+	}
+}
+
 bool MoveWindowToLeft(HWND hWnd, const MONITORINFO& mi, const RECT& windowRect) {
+    WINDOWPLACEMENT wp;
+    wp.length = sizeof(WINDOWPLACEMENT);
+    GetWindowPlacement(hWnd, &wp);
+    if (wp.showCmd == SW_MAXIMIZE) return MoveMaximizedWindow(hWnd, mi, true);
+
     // ウィンドウがモニターの左端にある場合、前のモニターに移動
     if (windowRect.left <= mi.rcWork.left) return MoveWindowToOtherMonitor(hWnd, mi, windowRect, false);
     return AdjustWindowPosition(hWnd, mi, windowRect, false); // 左側へ移動
 }
 
 bool MoveWindowToRight(HWND hWnd, const MONITORINFO& mi, const RECT& windowRect) {
+    WINDOWPLACEMENT wp;
+    wp.length = sizeof(WINDOWPLACEMENT);
+    GetWindowPlacement(hWnd, &wp);
+    if (wp.showCmd == SW_MAXIMIZE) return MoveMaximizedWindow(hWnd, mi, false);
+
     // ウィンドウがモニターの右端にある場合、次のモニターに移動
     if (windowRect.right >= mi.rcWork.right) return MoveWindowToOtherMonitor(hWnd, mi, windowRect, true);
     return AdjustWindowPosition(hWnd, mi, windowRect, true); // 右側へ移動
 }
 
-bool MoveFocusedWindow(int moveType, HWND minimizedWindow) {
+bool MoveFocusedWindow(int moveType, HWND& minimizedWindow) {
     HWND hWnd = GetForegroundWindow();
     if (hWnd == NULL) return false;
 
@@ -114,7 +136,9 @@ bool MoveFocusedWindow(int moveType, HWND minimizedWindow) {
         return minimizeWindow(hWnd, minimizedWindow);
     } else if (moveType == HOTKEY_RESTORE) {
         return restoreWindow(minimizedWindow);
-    }
+    } else if (moveType == HOTKEY_MAXIMIZE) {
+		return ShowWindow(hWnd, SW_MAXIMIZE);
+	}
 
     // ウィンドウがあるモニターの情報を取得
     MONITORINFO mi = { sizeof(mi) };
