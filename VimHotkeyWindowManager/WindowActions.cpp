@@ -1,11 +1,11 @@
 #include "WindowActions.h"
 
-bool minimizeWindow(HWND hWnd, HWND minimizedWindow) {
+bool minimizeWindow(HWND hWnd, HWND& minimizedWindow) {
     minimizedWindow = hWnd;
     return ShowWindow(hWnd, SW_MINIMIZE);
 }
 
-bool restoreWindow(HWND minimizedWindow) {
+bool restoreWindow(HWND& minimizedWindow) {
     if (minimizedWindow == NULL) return NO_MINIMIZED_WINDOW;
     bool ret = ShowWindow(minimizedWindow, SW_RESTORE);
     minimizedWindow = NULL;
@@ -106,7 +106,7 @@ bool MoveWindowToRight(HWND hWnd, const MONITORINFO& mi, const RECT& windowRect)
     return AdjustWindowPosition(hWnd, mi, windowRect, true); // ‰E‘¤‚ÖˆÚ“®
 }
 
-bool MoveFocusedWindow(int moveType, HWND minimizedWindow) {
+bool MoveFocusedWindow(int moveType, HWND& minimizedWindow) {
     HWND hWnd = GetForegroundWindow();
     if (hWnd == NULL) return false;
 
