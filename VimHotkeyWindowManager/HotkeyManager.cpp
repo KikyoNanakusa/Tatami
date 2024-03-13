@@ -7,4 +7,5 @@ void RegisterHotKeys(HWND hWnd) {
 	RegisterHotKey(hWnd, HOTKEY_RIGHT, MOD_ALT | MOD_SHIFT, 'L');
 	RegisterHotKey(hWnd, HOTKEY_MINIMIZE, MOD_ALT | MOD_SHIFT, 'D');
 	RegisterHotKey(hWnd, HOTKEY_RESTORE, MOD_ALT | MOD_SHIFT, 'U');
+	RegisterHotKey(hWnd, HOTKEY_MAXIMIZE, MOD_ALT | MOD_SHIFT, 'G');
 }

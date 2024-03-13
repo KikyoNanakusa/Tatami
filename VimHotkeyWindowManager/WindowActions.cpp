@@ -114,7 +114,9 @@ bool MoveFocusedWindow(int moveType, HWND minimizedWindow) {
         return minimizeWindow(hWnd, minimizedWindow);
     } else if (moveType == HOTKEY_RESTORE) {
         return restoreWindow(minimizedWindow);
-    }
+    } else if (moveType == HOTKEY_MAXIMIZE) {
+		return ShowWindow(hWnd, SW_MAXIMIZE);
+	}
 
     // ウィンドウがあるモニターの情報を取得
     MONITORINFO mi = { sizeof(mi) };
