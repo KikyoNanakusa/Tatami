@@ -1,5 +1,6 @@
 #include <Windows.h>
 #include "definition.h"
+#include "MonitorUtils.h"
 
 
 HMENU hMenu;
