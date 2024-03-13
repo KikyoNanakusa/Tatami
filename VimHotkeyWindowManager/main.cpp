@@ -5,11 +5,15 @@
 #define HOTKEY_DOWN 2
 #define HOTKEY_UP 3
 #define HOTKEY_RIGHT 4
+#define HOTKEY_MINIMIZE 5
+#define HOTKEY_RESTORE 6
+
 #define MENU_ACTIVATE 0x1
 #define MENU_EXIT 0x2
 
 HMENU hMenu;
 NOTIFYICONDATA nid;
+HWND minimizedWindow = NULL;
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
@@ -75,6 +79,8 @@ void RegisterHotKeys(HWND hWnd) {
 	RegisterHotKey(hWnd, HOTKEY_DOWN, MOD_WIN | MOD_SHIFT, 'J');
 	RegisterHotKey(hWnd, HOTKEY_UP, MOD_WIN | MOD_SHIFT, 'K');
 	RegisterHotKey(hWnd, HOTKEY_RIGHT, MOD_WIN | MOD_SHIFT, 'L');
+	RegisterHotKey(hWnd, HOTKEY_MINIMIZE, MOD_WIN | MOD_SHIFT, 'D');
+	RegisterHotKey(hWnd, HOTKEY_RESTORE, MOD_WIN | MOD_SHIFT, 'U');
 }
 
 bool moveFocusedWindow(int moveType) {
@@ -109,6 +115,14 @@ bool moveFocusedWindow(int moveType) {
         case HOTKEY_UP:
             newY = mi.rcWork.top;
             break;
+		case HOTKEY_MINIMIZE:
+			minimizedWindow = hWnd;
+			return ShowWindow(hWnd, SW_MINIMIZE);
+		case HOTKEY_RESTORE:
+			if (minimizedWindow == NULL) return true;
+			bool ret = ShowWindow(minimizedWindow, SW_RESTORE);
+			minimizedWindow = NULL;
+			return ret;
     }
 
     // ウィンドウを新しい位置に移動
