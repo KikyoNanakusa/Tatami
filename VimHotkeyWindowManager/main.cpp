@@ -9,6 +9,7 @@
 HMENU hMenu;
 NOTIFYICONDATA nid;
 HWND minimizedWindow = NULL;
+BOOL isEnabled = TRUE;
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
@@ -57,12 +58,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 		// Create context menu
 		hMenu = CreatePopupMenu();
-		AppendMenu(hMenu, MF_STRING, MENU_ACTIVATE, TEXT("有効無効切り替え"));
+		AppendMenu(hMenu, MF_STRING, MENU_ACTIVATE, TEXT("無効にする"));
 		AppendMenu(hMenu, MF_STRING, MENU_EXIT, TEXT("終了"));
 		break;
 	case WM_HOTKEY:
-		// Send notification to the main window
-		MoveFocusedWindow(wParam, minimizedWindow);
+		if (isEnabled) {
+			MoveFocusedWindow(wParam, minimizedWindow);
+		}
 		break;
 	case WM_CONTEXTMENU:
 		break;
@@ -86,8 +88,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			PostQuitMessage(0);
 			break;
 		case MENU_ACTIVATE:
-			//TODO:有効無効の切り替えを実装する
-			MessageBox(hWnd, TEXT("TODO:有効無効の切り替えを実装する"), TEXT("Menu"), MB_OK);
+			if (isEnabled) {
+				// メニュー項目を「無効にする」に変更
+				ModifyMenu(hMenu, MENU_ACTIVATE, MF_STRING, MENU_ACTIVATE, TEXT("有効にする"));
+			}
+			else {
+				// メニュー項目を「有効にする」に変更
+				ModifyMenu(hMenu, MENU_ACTIVATE, MF_STRING, MENU_ACTIVATE, TEXT("無効にする"));
+			}
+			isEnabled = !isEnabled; // 状態を反転
 			break;
 		}
 		break;
