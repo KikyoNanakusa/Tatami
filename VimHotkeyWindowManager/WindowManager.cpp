@@ -7,6 +7,9 @@ bool OnDestroy(HWND hWnd, NOTIFYICONDATA nid, HMENU hMenu)
 	UnregisterHotKey(hWnd, HOTKEY_UP);
 	UnregisterHotKey(hWnd, HOTKEY_DOWN);
 	UnregisterHotKey(hWnd, HOTKEY_RIGHT);
+	UnregisterHotKey(hWnd, HOTKEY_MAXIMIZE);
+	UnregisterHotKey(hWnd, HOTKEY_MINIMIZE);
+	UnregisterHotKey(hWnd, HOTKEY_RESTORE);
 
 	// Destroy window
 	DestroyWindow(hWnd);
