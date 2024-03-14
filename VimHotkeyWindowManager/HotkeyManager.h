@@ -3,4 +3,5 @@
 #include "definition.h"
 
 void RegisterHotKeys(HWND hWnd);
+void UnRegisterHotKeys(HWND hWnd);
 
