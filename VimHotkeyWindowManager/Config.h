@@ -1,6 +1,9 @@
 #pragma once
 #include <string>
 #include <map>
+#include <iostream>
+#include <sstream>
+#include "definition.h"
 
 class Config {
 public:

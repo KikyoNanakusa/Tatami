@@ -17,13 +17,13 @@
 
 #define UNKNOWN_HOTKEY 0x2
 
-#define ACTION_MOVE_LEFT 0x1
-#define ACTION_MOVE_DOWN 0x2
-#define ACTION_MOVE_UP 0x3
-#define ACTION_MOVE_RIGHT 0x4
-#define ACTION_MINIMIZE 0x5
-#define ACTION_RESTORE 0x6
-#define ACTION_MAXIMIZE 0x7
+#define ACTION_MOVE_WINDOW_LEFT 0x1
+#define ACTION_MOVE_WINDOW_DOWN 0x2
+#define ACTION_MOVE_WINDOW_UP 0x3
+#define ACTION_MOVE_WINDOW_RIGHT 0x4
+#define ACTION_WINDOW_MINIMIZE 0x5
+#define ACTION_WINDOW_RESTORE 0x6
+#define ACTION_WINDOW_MAXIMIZE 0x7
 
 const std::string DefaultConfig = "MoveWindowLeft=H\n"
 								  "MoveWindowDown=J\n"
