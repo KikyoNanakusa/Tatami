@@ -5,6 +5,7 @@
 #include "HotkeyManager.h"
 #include "WindowActions.h"
 #include "resource.h"
+#include "ConfigReader.h"
 
 
 HMENU hMenu;
@@ -31,6 +32,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 {
 	HWND hWnd;
 	MSG msg;
+
+	// 設定ファイルを読む
+	ReadConfigFile();
 
 	//ウィンドウを初期化
 	hWnd = InitWindow(hInstance, WndProc);
