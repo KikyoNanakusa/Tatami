@@ -1,4 +1,5 @@
 #include <Windows.h>
+#include <string>
 #include "definition.h"
 #include "MonitorUtils.h"
 #include "WindowManager.h"
@@ -34,7 +35,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	MSG msg;
 
 	// 設定ファイルを読む
-	ReadConfigFile();
+	std::string configString = ReadConfigFile();
+	if (configString.empty()) {
+		MessageBox(NULL, TEXT("設定ファイルの読み込みに失敗しました"), TEXT("エラー"), MB_OK);
+		return 1;
+	}
 
 	//ウィンドウを初期化
 	hWnd = InitWindow(hInstance, WndProc);
