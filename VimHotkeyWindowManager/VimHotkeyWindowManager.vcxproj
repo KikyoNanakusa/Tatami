@@ -70,6 +70,9 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)bin/$(Platform)</OutDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -136,6 +139,7 @@
     <ClCompile Include="MonitorUtils.cpp" />
     <ClCompile Include="WindowActions.cpp" />
     <ClCompile Include="WindowManager.cpp" />
+    <ClCompile Include="WindowSizeManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="definition.h" />
@@ -144,6 +148,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="WindowActions.h" />
     <ClInclude Include="WindowManager.h" />
+    <ClInclude Include="WindowSizeManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="VimHotkeyWindowManager.rc" />
