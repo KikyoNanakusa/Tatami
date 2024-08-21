@@ -5,5 +5,5 @@
 #include <iostream>
 #include <vector>
 
-bool ReadConfigFile();
+std::string ReadConfigFile();
 

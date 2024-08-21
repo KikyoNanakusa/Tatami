@@ -94,25 +94,26 @@ std::string ReadFileContents(const std::string& filename) {
     return std::string(buffer.begin(), buffer.end());
 }
 
-bool ReadConfigFile() {
+std::string ReadConfigFile() {
     std::string appDataPath = GetAppDataPath("VWindowManager");
 
     if (appDataPath.empty()) {
-        return false;
+        return "";
     }
 
     if (!createDirectoryIfNotExists(appDataPath)) {
-        return false;
+        return "";
     }
 
     std::string configPath = appDataPath + "\\config.txt";
     if (!createFileIfNotExists(configPath)) {
-        return false;
+        return "";
 	}
 
     std::string fileContents = ReadFileContents(configPath);
     if (fileContents.empty()) {
-        return false;
+        return "";
     }
-	return true;
+
+	return fileContents;
 }
