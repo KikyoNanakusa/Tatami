@@ -7,6 +7,7 @@
 #include "WindowActions.h"
 #include "resource.h"
 #include "ConfigReader.h"
+#include "Config.h"
 
 
 HMENU hMenu;
@@ -40,6 +41,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		MessageBox(NULL, TEXT("設定ファイルの読み込みに失敗しました"), TEXT("エラー"), MB_OK);
 		return 1;
 	}
+
+	// 設定ファイルを解析
+	Config config;
+	config.loadConfig(configString);
 
 	//ウィンドウを初期化
 	hWnd = InitWindow(hInstance, WndProc);

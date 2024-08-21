@@ -2,16 +2,20 @@
 
 class Config {
 public:
+    Config() {
+        configMap = std::map<int, int>();
+    }
+
     bool loadConfig(const std::string& configString) {
         return true;
     }
 
-    std::string getConfigValue(const std::string& key) {
-		return "";
+    std::map<int, int> getConfigMap(const int) {
+        return {};
 	}
 
 private:
-    std::map<std::string, std::string> configMap;
+    std::map<int, int> configMap;
 
     bool parseConfigString(const std::string& configString) {
 		return true;
