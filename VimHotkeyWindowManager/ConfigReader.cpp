@@ -37,11 +37,16 @@ bool createFileIfNotExists(const std::string& filename) {
         );
 
         if (hFile == INVALID_HANDLE_VALUE) {
-            std::cerr << "ファイルの作成に失敗しました: " << GetLastError() << std::endl;
             return false;
         }
 
-        std::cout << "新しいファイルを作成しました: " << filename << std::endl;
+        // 初期値を書き込む
+        DWORD bytesWritten;
+        if (!WriteFile(hFile, DefaultConfig.c_str(), DefaultConfig.size(), &bytesWritten, NULL)) {
+			CloseHandle(hFile);
+			return false;
+		}
+
         CloseHandle(hFile);
         return true;
     }

@@ -1,24 +1,18 @@
 #include "Config.h"
 
-class Config {
-public:
-    Config() {
-        configMap = std::map<int, int>();
-    }
+Config::Config() {
+	configMap = std::map<int, int>();
+}
 
-    bool loadConfig(const std::string& configString) {
-        return true;
-    }
+bool Config::loadConfig(const std::string& configString) {
+	return true;
+}
 
-    std::map<int, int> getConfigMap(const int) {
-        return {};
-	}
+std::map<int, int> Config::getConfigMap(const int) {
+	return {};
+}
 
-private:
-    std::map<int, int> configMap;
 
-    bool parseConfigString(const std::string& configString) {
-		return true;
-	}
-
-};
+bool Config::parseConfigString(const std::string& configString) {
+	return true;
+}

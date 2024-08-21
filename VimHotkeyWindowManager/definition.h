@@ -1,4 +1,6 @@
 #pragma once
+#include <string>
+
 #define WM_NOTIFICATION (WM_USER + 100)
 #define HOTKEY_LEFT 1
 #define HOTKEY_DOWN 2
@@ -22,3 +24,11 @@
 #define ACTION_MINIMIZE 0x5
 #define ACTION_RESTORE 0x6
 #define ACTION_MAXIMIZE 0x7
+
+const std::string DefaultConfig = "MoveWindowLeft=H\n"
+								  "MoveWindowDown=J\n"
+								  "MoveWindowUp=K\n"
+								  "MoveWindowRight=L\n"
+								  "MinimizeWindow=D\n"
+								  "RestoreWindow=U\n"
+								  "MaximizeWindow=G\n";		

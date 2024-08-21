@@ -4,7 +4,7 @@
 
 class Config {
 public:
-	Config() = default;
+	Config();
 	bool loadConfig(const std::string& configString);
 	std::map<int, int> getConfigMap(const int);
 private:

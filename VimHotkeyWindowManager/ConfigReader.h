@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include "definition.h"
 
 std::string ReadConfigFile();
 
