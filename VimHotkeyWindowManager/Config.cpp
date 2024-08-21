@@ -1,7 +1,7 @@
 #include "Config.h"
 
 Config::Config() {
-	configMap = std::map<int, int>();
+	configMap = std::map<Action, int>();
 }
 
 bool Config::loadConfig(const std::string& configString) {
@@ -11,7 +11,7 @@ bool Config::loadConfig(const std::string& configString) {
 	return true;
 }
 
-std::map<int, int> Config::getConfigMap(const int) {
+std::map<Action, int> Config::getConfigMap() {
 	return configMap;
 }
 

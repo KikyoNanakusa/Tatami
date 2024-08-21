@@ -9,8 +9,8 @@ class Config {
 public:
 	Config();
 	bool loadConfig(const std::string& configString);
-	std::map<int, int> getConfigMap(const int);
+	std::map<Action, int> getConfigMap();
 private:
-	std::map<int, int> configMap;
+	std::map<Action, int> configMap;
 	bool parseConfigString(const std::string& configString);
 };
