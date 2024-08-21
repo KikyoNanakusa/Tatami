@@ -127,6 +127,10 @@ bool MoveWindowToUp(HWND hWnd, const MONITORINFO& mi, const RECT& windowRect) {
 	return SetWindowPos(hWnd, NULL, windowRect.left, mi.rcWork.top, windowRect.right - windowRect.left, monitorHeight / 2, SWP_NOZORDER);
 }
 
+bool MaximizeWindow(HWND hWnd, const MONITORINFO& mi) {
+	return SetWindowPos(hWnd, NULL, mi.rcWork.left, mi.rcWork.top, GetMonitorWorkWidth(mi), GetMonitorWorkHeight(mi), SWP_NOZORDER);
+}
+
 bool MoveFocusedWindow(int moveType, HWND& lastMinimizedWindow) {
     HWND hWnd = GetForegroundWindow();
     if (hWnd == NULL) return false;
@@ -137,7 +141,7 @@ bool MoveFocusedWindow(int moveType, HWND& lastMinimizedWindow) {
         return RestoreWindow(lastMinimizedWindow);
     } else if (moveType == HOTKEY_MAXIMIZE) {
         // ウィンドウを最大化
-		return ShowWindow(hWnd, SW_MAXIMIZE);
+		ShowWindow(hWnd, SW_MAXIMIZE);
 	}
 
     // ウィンドウがあるモニターの情報を取得
@@ -149,6 +153,7 @@ bool MoveFocusedWindow(int moveType, HWND& lastMinimizedWindow) {
     GetWindowRect(hWnd, &rect);
 
     switch (moveType) {
+        case HOTKEY_MAXIMIZE: return MaximizeWindow(hWnd, monitorInfo); break;
 		case HOTKEY_LEFT: return MoveWindowToLeft(hWnd, monitorInfo, rect); break;
         case HOTKEY_RIGHT: return MoveWindowToRight(hWnd, monitorInfo, rect); break;
         case HOTKEY_DOWN: return MoveWindowToDown(hWnd, monitorInfo, rect); break;
