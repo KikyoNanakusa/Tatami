@@ -28,17 +28,17 @@ TEST(ConfigReaderTests, CreateDirectoryAndFileIfNotExist) {
     std::string appDataPath = GetAppDataPath(APP_NAME);
     std::string configPath = appDataPath + CONFIG_FILE_NAME;
 
-    if (isFileExists(configPath)) {
+    if (isPathExists(configPath)) {
         remove(configPath.c_str());
     }
-    if (isFileExists(appDataPath)) {
+    if (isPathExists(appDataPath)) {
         RemoveDirectoryA(appDataPath.c_str());
     }
 
     std::string content = ReadConfigFile();
     EXPECT_FALSE(content.empty());
 
-    EXPECT_TRUE(isFileExists(configPath));
+    EXPECT_TRUE(isPathExists(configPath));
 
     std::string fileContent = ReadFile(configPath);
     EXPECT_EQ(fileContent, DefaultConfig);
@@ -52,7 +52,7 @@ TEST(ConfigReaderTests, ReadExistingConfigFile) {
     std::string appDataPath = GetAppDataPath(APP_NAME);
     std::string configPath = appDataPath + CONFIG_FILE_NAME;
 
-    if (!isFileExists(appDataPath)) {
+    if (!isPathExists(appDataPath)) {
 		CreateDirectoryA(appDataPath.c_str(), NULL);
 	}
 
@@ -73,7 +73,7 @@ TEST(ConfigReaderTests, ConfigFileNotRecreatedIfExists) {
     std::string appDataPath = GetAppDataPath(APP_NAME);
     std::string configPath = appDataPath + CONFIG_FILE_NAME;
 
-    if (!isFileExists(appDataPath)) {
+    if (!isPathExists(appDataPath)) {
 		CreateDirectoryA(appDataPath.c_str(), NULL);
 	}
 

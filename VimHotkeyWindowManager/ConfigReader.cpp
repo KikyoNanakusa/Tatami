@@ -1,6 +1,6 @@
 #include "ConfigReader.h"
 
-bool isFileExists(const std::string& filename) {
+bool isPathExists(const std::string& filename) {
     DWORD fileAttributes = GetFileAttributesA(filename.c_str());
     // If the file does not exist, GetFileAttributes returns INVALID_FILE_ATTRIBUTES.
     if (fileAttributes == INVALID_FILE_ATTRIBUTES) {
@@ -22,7 +22,7 @@ bool createDirectoryIfNotExists(const std::string& dirPath) {
 }
 
 bool createFileIfNotExists(const std::string& filename) {
-    if (isFileExists(filename)) {
+    if (isPathExists(filename)) {
         std::cout << "ƒtƒ@ƒCƒ‹‚ÍŠù‚É‘¶Ý‚µ‚Ü‚·: " << filename << std::endl;
         return true;
     } else {
