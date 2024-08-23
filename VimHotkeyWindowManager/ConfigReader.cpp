@@ -1,9 +1,9 @@
 #include "ConfigReader.h"
 
-bool isFileExists(const std::string& filename) {
+bool isPathExists(const std::string& filename) {
     DWORD fileAttributes = GetFileAttributesA(filename.c_str());
+    // If the file does not exist, GetFileAttributes returns INVALID_FILE_ATTRIBUTES.
     if (fileAttributes == INVALID_FILE_ATTRIBUTES) {
-        // ファイルが存在しない場合、またはアクセスできない場合
         return false;
     }
     return true;
@@ -22,7 +22,7 @@ bool createDirectoryIfNotExists(const std::string& dirPath) {
 }
 
 bool createFileIfNotExists(const std::string& filename) {
-    if (isFileExists(filename)) {
+    if (isPathExists(filename)) {
         std::cout << "ファイルは既に存在します: " << filename << std::endl;
         return true;
     } else {

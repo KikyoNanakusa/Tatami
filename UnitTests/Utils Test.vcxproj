@@ -25,7 +25,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
-    <ProjectName>Utils_Test</ProjectName>
+    <ProjectName>UnitTests</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -106,6 +106,7 @@
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ConfigReaderTest.cpp" />
     <ClCompile Include="ConfigTest.cpp" />
     <ClCompile Include="GetVkCodeTests.cpp" />
     <ClCompile Include="pch.cpp">
