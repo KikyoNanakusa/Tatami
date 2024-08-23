@@ -2,7 +2,6 @@
 #include <Windows.h>
 #include "definition.h"
 #include "MonitorUtils.h"
-#include "WindowSizeManager.h"
 #include <ShellScalingApi.h>
 #pragma comment(lib, "Shcore.lib")
 

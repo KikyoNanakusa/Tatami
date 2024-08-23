@@ -30,9 +30,6 @@
     <ClCompile Include="WindowManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="WindowSizeManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="ConfigReader.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -63,9 +60,6 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="WindowSizeManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="ConfigReader.h">

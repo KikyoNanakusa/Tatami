@@ -142,7 +142,6 @@
     <ClCompile Include="Utils.cpp" />
     <ClCompile Include="WindowActions.cpp" />
     <ClCompile Include="WindowManager.cpp" />
-    <ClCompile Include="WindowSizeManager.cpp" />
     <ClCompile Include="ConfigReader.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -156,7 +155,6 @@
     <ClInclude Include="Utils.h" />
     <ClInclude Include="WindowActions.h" />
     <ClInclude Include="WindowManager.h" />
-    <ClInclude Include="WindowSizeManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="VimHotkeyWindowManager.rc" />
