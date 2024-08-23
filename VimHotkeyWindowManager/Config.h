@@ -12,6 +12,7 @@ public:
 	Config();
 	bool loadConfig(const std::string& configString);
 	std::map<Action, SHORT> getConfigMap();
+	SHORT getConfigValue(Action action);
 private:
 	std::map<Action, SHORT> configMap;
 	bool parseConfigString(const std::string& configString);

@@ -1,6 +1,8 @@
 #include "HotkeyManager.h"
 
 void RegisterHotKeys(HWND hWnd, Config* config) {
+    //if (!ResigrerHotKey(hWnd, HOTKEY_LEFT, MOD_ALT | MOD_SHIFT, config->))
+
     if (!RegisterHotKey(hWnd, HOTKEY_LEFT, MOD_ALT | MOD_SHIFT, 'H') ||
         !RegisterHotKey(hWnd, HOTKEY_DOWN, MOD_ALT | MOD_SHIFT, 'J') ||
         !RegisterHotKey(hWnd, HOTKEY_UP, MOD_ALT | MOD_SHIFT, 'K') ||

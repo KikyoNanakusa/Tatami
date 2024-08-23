@@ -15,6 +15,10 @@ std::map<Action, SHORT> Config::getConfigMap() {
 	return configMap;
 }
 
+SHORT Config::getConfigValue(Action action) {
+	return configMap[action];
+}
+
 bool Config::parseConfigString(const std::string& configString) {
     std::istringstream configStream(configString);
     std::string line;
