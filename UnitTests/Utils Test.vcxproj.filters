@@ -11,6 +11,9 @@
     <ClCompile Include="GetVkCodeTests.cpp">
       <Filter>Test</Filter>
     </ClCompile>
+    <ClCompile Include="ConfigReaderTest.cpp">
+      <Filter>Test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -19,5 +22,8 @@
     <Filter Include="Test">
       <UniqueIdentifier>{dfd4dad6-3085-4d72-b2af-0e8b239d4740}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

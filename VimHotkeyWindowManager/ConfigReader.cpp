@@ -2,8 +2,8 @@
 
 bool isFileExists(const std::string& filename) {
     DWORD fileAttributes = GetFileAttributesA(filename.c_str());
+    // If the file does not exist, GetFileAttributes returns INVALID_FILE_ATTRIBUTES.
     if (fileAttributes == INVALID_FILE_ATTRIBUTES) {
-        // ファイルが存在しない場合、またはアクセスできない場合
         return false;
     }
     return true;
