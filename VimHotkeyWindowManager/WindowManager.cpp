@@ -19,7 +19,7 @@ bool OnDestroy(HWND hWnd, NOTIFYICONDATA nid, HMENU hMenu)
 	return true;
 }
 
-HWND InitWindow(HINSTANCE hInstance ,WNDPROC lpfnWndProc) {
+HWND InitWindow(HINSTANCE hInstance ,WNDPROC lpfnWndProc, Config* config) {
 	// Create window
 	WNDCLASS wc;
 	wc.style = 0;
@@ -33,7 +33,7 @@ HWND InitWindow(HINSTANCE hInstance ,WNDPROC lpfnWndProc) {
 	wc.lpszMenuName = NULL;
 	wc.lpszClassName = TEXT("VimHotkeyWindowManager");
 	RegisterClass(&wc);
-	return CreateWindow(
+	HWND hWnd = CreateWindow(
 		TEXT("VimHotkeyWindowManager"),
 		TEXT("VimHotkeyWindowManager"),
 		WS_OVERLAPPEDWINDOW,
@@ -46,4 +46,10 @@ HWND InitWindow(HINSTANCE hInstance ,WNDPROC lpfnWndProc) {
 		hInstance,
 		NULL
 	);
+
+	if (hWnd) {
+		SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(config));
+	}
+	
+	return hWnd;
 }

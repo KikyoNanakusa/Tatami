@@ -30,7 +30,7 @@ void InitTaskIcon(HWND hWnd) {
 }
 
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow)
 {
 	HWND hWnd;
 	MSG msg;
@@ -38,16 +38,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// 設定ファイルを読む
 	std::string configString = ReadConfigFile();
 	if (configString.empty()) {
-		MessageBox(NULL, TEXT("設定ファイルの読み込みに失敗しました"), TEXT("エラー"), MB_OK);
+		MessageBox(NULL, TEXT("Failed to read config file"), TEXT("ERROR"), MB_OK);
 		return 1;
 	}
 
 	// 設定ファイルを解析
 	Config config;
-	config.loadConfig(configString);
+	if (!config.loadConfig(configString)) {
+		MessageBox(NULL, TEXT("Failed to parse config file"), TEXT("ERROR"), MB_OK);
+		return 1;
+	}
 
 	//ウィンドウを初期化
-	hWnd = InitWindow(hInstance, WndProc);
+	hWnd = InitWindow(hInstance, WndProc, &config);
 
 	//タスクトレイにアイコンを追加
 	InitTaskIcon(hWnd);
@@ -63,12 +66,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	POINT point;
+	Config* config = reinterpret_cast<Config*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
 
 	switch (message)
 	{
 	case WM_CREATE:
+
 		// Register hotkey
-		RegisterHotKeys(hWnd);
+		RegisterHotKeys(hWnd, config);
 
 
 		// Create context menu

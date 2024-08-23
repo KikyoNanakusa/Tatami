@@ -1,6 +1,10 @@
 #include "Utils.h"
 
 std::string trim(const std::string& s) {
+    if (s.empty()) {
+		return "";
+	}
+
     auto start = s.begin();
     while (start != s.end() && std::isspace(*start)) {
         start++;
