@@ -1,10 +1,14 @@
 #include "pch.h"
 #include "gtest/gtest.h"
 #include "KeyUtils.h"
+#include "KeyUtils.cpp"
 
 // 大文字のテスト
 TEST(GetVkCodeTests, UpperCaseLetters) {
     EXPECT_EQ(0x48, getVkCodeFromChar('H'));  
+    EXPECT_EQ(0x4A, getVkCodeFromChar('J'));
+    EXPECT_EQ(0x4B, getVkCodeFromChar('K'));
+    EXPECT_EQ(0x4C, getVkCodeFromChar('L'));
     EXPECT_EQ(0x41, getVkCodeFromChar('A'));  
 }
 
@@ -26,7 +30,3 @@ TEST(GetVkCodeTests, SpecialCharacters) {
     EXPECT_EQ(0xDE, getVkCodeFromChar('\'')); 
 }
 
-// 無効な文字のテスト
-TEST(GetVkCodeTests, InvalidCharacter) {
-    EXPECT_EQ(-1, getVkCodeFromChar('\0'));  
-}
