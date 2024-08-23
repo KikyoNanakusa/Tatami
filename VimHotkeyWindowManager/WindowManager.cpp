@@ -19,21 +19,28 @@ bool OnDestroy(HWND hWnd, NOTIFYICONDATA nid, HMENU hMenu)
 	return true;
 }
 
-HWND InitWindow(HINSTANCE hInstance ,WNDPROC lpfnWndProc) {
+HWND InitWindow(HINSTANCE hInstance ,WNDPROC lpfnWndProc, Config* config) {
 	// Create window
 	WNDCLASS wc;
 	wc.style = 0;
 	wc.lpfnWndProc = lpfnWndProc;
 	wc.cbClsExtra = 0;
-	wc.cbWndExtra = 0;
+	wc.cbWndExtra = sizeof(Config*);
 	wc.hInstance = hInstance;
 	wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
 	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
 	wc.lpszMenuName = NULL;
 	wc.lpszClassName = TEXT("VimHotkeyWindowManager");
-	RegisterClass(&wc);
-	return CreateWindow(
+
+	if (!RegisterClass(&wc)) {
+		DWORD error = GetLastError();
+		MessageBox(NULL, TEXT("Failed to register window class"), TEXT("ERROR"), MB_OK);
+		return NULL;
+	}
+
+	// Use lParam to pass Config object
+	HWND hWnd = CreateWindow(
 		TEXT("VimHotkeyWindowManager"),
 		TEXT("VimHotkeyWindowManager"),
 		WS_OVERLAPPEDWINDOW,
@@ -44,6 +51,8 @@ HWND InitWindow(HINSTANCE hInstance ,WNDPROC lpfnWndProc) {
 		NULL,
 		NULL,
 		hInstance,
-		NULL
+		config
 	);
+
+	return hWnd;
 }

@@ -134,18 +134,26 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Config.cpp" />
     <ClCompile Include="HotkeyManager.cpp" />
+    <ClCompile Include="KeyUtils.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MonitorUtils.cpp" />
+    <ClCompile Include="Utils.cpp" />
     <ClCompile Include="WindowActions.cpp" />
     <ClCompile Include="WindowManager.cpp" />
     <ClCompile Include="WindowSizeManager.cpp" />
+    <ClCompile Include="ConfigReader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Config.h" />
+    <ClInclude Include="ConfigReader.h" />
     <ClInclude Include="definition.h" />
     <ClInclude Include="HotkeyManager.h" />
+    <ClInclude Include="KeyUtils.h" />
     <ClInclude Include="MonitorUtils.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="Utils.h" />
     <ClInclude Include="WindowActions.h" />
     <ClInclude Include="WindowManager.h" />
     <ClInclude Include="WindowSizeManager.h" />
