@@ -66,65 +66,75 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	POINT point;
-	Config* config = reinterpret_cast<Config*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
 
-	switch (message)
-	{
-	case WM_CREATE:
+	switch (message) {
+		case WM_CREATE:
+			// Make scope for pCreate, Config
+			{
+				CREATESTRUCT* pCreate = reinterpret_cast<CREATESTRUCT*>(lParam);
+				Config* config = reinterpret_cast<Config*>(pCreate->lpCreateParams);
 
-		// Register hotkey
-		RegisterHotKeys(hWnd, config);
+				if (!config) {
+					MessageBox(hWnd, L"Invalid config pointer", L"Error", MB_ICONERROR);
+					PostQuitMessage(1);
+					return -1;
+				}
 
+				// Register hotkey
+				RegisterHotKeys(hWnd, config);
+			}
 
-		// Create context menu
-		hMenu = CreatePopupMenu();
-		AppendMenu(hMenu, MF_STRING, MENU_ACTIVATE, TEXT("無効にする"));
-		AppendMenu(hMenu, MF_STRING, MENU_EXIT, TEXT("終了"));
-		break;
-	case WM_HOTKEY:
-		if (isEnabled) {
-			MoveFocusedWindow(wParam, minimizedWindow);
-		}
-		break;
-	case WM_CONTEXTMENU:
-		break;
-	case WM_NOTIFICATION:
-		switch (lParam)
-		{
-			case WM_RBUTTONDOWN:
-				//NOTE:SetForegroundWindow() is required to delete the context menu
-				SetForegroundWindow(hWnd);
-				GetCursorPos(&point);
-				int cmd = TrackPopupMenu(hMenu, TPM_LEFTALIGN | TPM_RIGHTBUTTON | TPM_RETURNCMD, point.x, point.y, 0, hWnd, NULL);
-				SendMessage(hWnd, WM_COMMAND, cmd, 0);
-				break;
-		}
-		break;
-	case WM_COMMAND:
-		switch (LOWORD(wParam))
-		{
-		case MENU_EXIT:
-			OnDestroy(hWnd, nid, hMenu);
-			PostQuitMessage(0);
+			// Create context menu
+			hMenu = CreatePopupMenu();
+			AppendMenu(hMenu, MF_STRING, MENU_ACTIVATE, TEXT("無効にする"));
+			AppendMenu(hMenu, MF_STRING, MENU_EXIT, TEXT("終了"));
 			break;
-		case MENU_ACTIVATE:
+
+		case WM_HOTKEY:
 			if (isEnabled) {
-				// メニュー項目を「無効にする」に変更
-				ModifyMenu(hMenu, MENU_ACTIVATE, MF_STRING, MENU_ACTIVATE, TEXT("有効にする"));
+				MoveFocusedWindow(wParam, minimizedWindow);
 			}
-			else {
-				// メニュー項目を「有効にする」に変更
-				ModifyMenu(hMenu, MENU_ACTIVATE, MF_STRING, MENU_ACTIVATE, TEXT("無効にする"));
-			}
-			isEnabled = !isEnabled; // 状態を反転
 			break;
-		}
-		break;
-	case WM_DESTROY:
-		OnDestroy(hWnd, nid, hMenu);
-		break;
-	default:
-		return DefWindowProc(hWnd, message, wParam, lParam);
+		case WM_CONTEXTMENU:
+			break;
+
+		case WM_NOTIFICATION:
+			switch (lParam)
+			{
+				case WM_RBUTTONDOWN:
+					//NOTE:SetForegroundWindow() is required to delete the context menu
+					SetForegroundWindow(hWnd);
+					GetCursorPos(&point);
+					int cmd = TrackPopupMenu(hMenu, TPM_LEFTALIGN | TPM_RIGHTBUTTON | TPM_RETURNCMD, point.x, point.y, 0, hWnd, NULL);
+					SendMessage(hWnd, WM_COMMAND, cmd, 0);
+					break;
+			}
+			break;
+		case WM_COMMAND:
+			switch (LOWORD(wParam))
+			{
+			case MENU_EXIT:
+				OnDestroy(hWnd, nid, hMenu);
+				PostQuitMessage(0);
+				break;
+			case MENU_ACTIVATE:
+				if (isEnabled) {
+					// メニュー項目を「無効にする」に変更
+					ModifyMenu(hMenu, MENU_ACTIVATE, MF_STRING, MENU_ACTIVATE, TEXT("有効にする"));
+				}
+				else {
+					// メニュー項目を「有効にする」に変更
+					ModifyMenu(hMenu, MENU_ACTIVATE, MF_STRING, MENU_ACTIVATE, TEXT("無効にする"));
+				}
+				isEnabled = !isEnabled; // 状態を反転
+				break;
+			}
+			break;
+		case WM_DESTROY:
+			OnDestroy(hWnd, nid, hMenu);
+			break;
+		default:
+			return DefWindowProc(hWnd, message, wParam, lParam);
 	}
 	return 0;
 }
