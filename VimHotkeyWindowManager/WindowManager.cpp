@@ -1,4 +1,5 @@
 #include "WindowManager.h"
+#include "window.h"
 
 bool OnDestroy(HWND hWnd, NOTIFYICONDATA nid, HMENU hMenu)
 {
@@ -10,6 +11,14 @@ bool OnDestroy(HWND hWnd, NOTIFYICONDATA nid, HMENU hMenu)
 	UnregisterHotKey(hWnd, HOTKEY_MAXIMIZE);
 	UnregisterHotKey(hWnd, HOTKEY_MINIMIZE);
 	UnregisterHotKey(hWnd, HOTKEY_RESTORE);
+
+	// Destroy monitor list
+	MonitorList* current = primary_monitor;
+	while (current) {
+		MonitorList* next = current->next_monitor;
+		delete current;
+		current = next;
+	}
 
 	// Destroy window
 	DestroyWindow(hWnd);
