@@ -13,9 +13,9 @@ bool OnDestroy(HWND hWnd, NOTIFYICONDATA nid, HMENU hMenu)
 	UnregisterHotKey(hWnd, HOTKEY_RESTORE);
 
 	// Destroy monitor list
-	MonitorList* current = primary_monitor;
+	Monitor* current = primary_monitor;
 	while (current) {
-		MonitorList* next = current->next_monitor;
+		Monitor* next = current->next_monitor;
 		delete current;
 		current = next;
 	}

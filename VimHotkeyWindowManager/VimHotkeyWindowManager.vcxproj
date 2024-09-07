@@ -138,9 +138,10 @@
     <ClCompile Include="HotkeyManager.cpp" />
     <ClCompile Include="KeyUtils.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Monitor.cpp" />
     <ClCompile Include="MonitorUtils.cpp" />
     <ClCompile Include="Utils.cpp" />
-    <ClCompile Include="window.cpp" />
+    <ClCompile Include="Window.cpp" />
     <ClCompile Include="WindowActions.cpp" />
     <ClCompile Include="WindowManager.cpp" />
     <ClCompile Include="ConfigReader.cpp" />
@@ -151,10 +152,11 @@
     <ClInclude Include="definition.h" />
     <ClInclude Include="HotkeyManager.h" />
     <ClInclude Include="KeyUtils.h" />
+    <ClInclude Include="Monitor.h" />
     <ClInclude Include="MonitorUtils.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Utils.h" />
-    <ClInclude Include="window.h" />
+    <ClInclude Include="Window.h" />
     <ClInclude Include="WindowActions.h" />
     <ClInclude Include="WindowManager.h" />
   </ItemGroup>

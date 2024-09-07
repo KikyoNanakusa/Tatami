@@ -1,59 +1,88 @@
 #pragma once
 #include <Windows.h>
+#include "Monitor.h"
 
-typedef enum horizontal_alignment horizontal_alignment;
-enum horizontal_alignment {
-	HORIZ_LEFT,
-	HORIZ_CENTER,
-	HORIZ_RIGHT,
-	HORIZ_FILL
+struct Window;
+
+enum HorizontalAlignment {
+    HA_FREE,
+    HA_LEFT,
+    HA_CENTER,
+    HA_RIGHT
 };
 
-typedef enum vertical_alignment vertical_alignment;
-enum vertical_alignment {
-	VERT_TOP,
-	VERT_CENTER,
-	VERT_BOTTOM,
-	VERT_FILL
+enum VerticalAlignment {
+    VA_FREE,
+    VA_TOP,
+    VA_CENTER,
+    VA_BOTTOM
 };
 
-typedef struct Window Window;
 struct Window {
-	horizontal_alignment halign;
-	vertical_alignment valign;
-	HWND hwnd;
+    HWND hwnd;
+    Monitor *monitor;
 
-	// belows are for future use
-	Window* left_window;
-	Window* right_window;
-	Window* top_window;
-	Window* bottom_window;
+    Window* left_window = nullptr;
+    Window* right_window = nullptr;
+    Window* top_window = nullptr;
+    Window* bottom_window = nullptr;
 
+    HorizontalAlignment horizontal_alignment = HA_FREE;
+    VerticalAlignment vertical_alignment = VA_FREE;
+    bool isMaximized = false;
+
+    Window* next_window = nullptr;
+    Window* prev_window = nullptr;
+
+    Window(HWND hwnd, Monitor* monitor) 
+        : hwnd(hwnd), monitor(monitor) {}
+
+    void SetLeftWindow(Window* window) {
+        left_window = window;
+        if (window) {
+            window->right_window = this;
+        }
+    }
+
+    void SetRightWindow(Window* window) {
+        right_window = window;
+        if (window) {
+            window->left_window = this;
+        }
+    }
+
+    void SetTopWindow(Window* window) {
+        top_window = window;
+        if (window) {
+            window->bottom_window = this;
+        }
+    }
+
+    void SetBottomWindow(Window* window) {
+        bottom_window = window;
+        if (window) {
+            window->top_window = this;
+        }
+    }
+
+    void SetNextWindow(Window* next) {
+        next_window = next;
+        if (next) {
+            next->prev_window = this;
+        }
+    }
+
+    void SetPrevWindow(Window* prev) {
+        prev_window = prev;
+        if (prev) {
+            prev->next_window = this;
+        }
+    }
 };
 
-typedef struct MonitorList WindowPlacement;
-struct MonitorList {
-	Window left{};
-	Window right{};
-	Window top{};
-	Window bottom{};
-	HMONITOR monitor;
-	MonitorList* next_monitor = nullptr;
-	MonitorList* prev_monitor = nullptr;
+extern Window *head_window;
 
-	MonitorList(HMONITOR monitor) : monitor(monitor) {}
+Monitor *FindMonitorByHmonitor(HMONITOR hMonitor);
+bool AddWindowToList(HWND hWnd, Monitor* ml);
+Window* FindWindowByHwnd(HWND hwnd);
 
-	void SetNextMonitor(MonitorList *next) {
-		next_monitor = next;
-		if(next) next->prev_monitor = this;
-	}
-
-	void SetPrevMonitor(MonitorList *prev) {
-		prev_monitor = prev;
-		prev->next_monitor = this;
-	}
-};
-
-extern MonitorList* primary_monitor;
-BOOL CALLBACK MonitorEnumProcToInitList(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData);
-bool InitializeMonitorList();

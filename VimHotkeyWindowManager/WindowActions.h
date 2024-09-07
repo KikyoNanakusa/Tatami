@@ -1,8 +1,11 @@
 #pragma once
 #include <Windows.h>
+#include <ShellScalingApi.h>
 #include "definition.h"
 #include "MonitorUtils.h"
-#include <ShellScalingApi.h>
+#include "Window.h"
+#include "Monitor.h"
+
 #pragma comment(lib, "Shcore.lib")
 
 bool MoveFocusedWindow(int moveType, HWND& minimizedWindow);

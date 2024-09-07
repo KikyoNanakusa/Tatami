@@ -144,9 +144,25 @@ bool MoveFocusedWindow(int moveType, HWND& lastMinimizedWindow) {
 		ShowWindow(hWnd, SW_MAXIMIZE);
 	}
 
+
     // ウィンドウがあるモニターの情報を取得
     MONITORINFO monitorInfo = { sizeof(monitorInfo) };
-    if (!GetMonitorInfo(MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST), &monitorInfo)) return false;
+    HMONITOR hMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+    if (!GetMonitorInfo(hMonitor, &monitorInfo)) return false;
+    
+    // モニターがリストにあるか確認
+    //TODO: エラーハンドリング
+    Monitor *monitor = FindMonitorByHmonitor(hMonitor);
+    if (monitor == nullptr) {
+        return false;
+	}
+
+    // ウィンドウがリストにあるか確認、無ければ追加
+    Window *window = FindWindowByHwnd(hWnd);
+    if (window == nullptr) {
+        AddWindowToList(hWnd, monitor);
+        window = head_window;
+    }
 
     // ウィンドウの位置とサイズを取得
     RECT rect;

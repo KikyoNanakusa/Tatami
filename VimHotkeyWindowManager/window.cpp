@@ -1,46 +1,46 @@
-#include "window.h"
+#include "Window.h"
 
-MonitorList *primary_monitor = nullptr;
+// Global Lists of Monitors and Windows
+Window *head_window = nullptr;
 
-BOOL CALLBACK MonitorEnumProcToInitList(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData) {
-	MonitorList** head = reinterpret_cast<MonitorList**>(dwData);
-
-	MONITORINFO mi = {};
-	mi.cbSize = sizeof(mi);
-	if (GetMonitorInfo(hMonitor, &mi)) {
-		MonitorList* new_placement = new MonitorList(hMonitor);
-
-		// if there is no monitor in the list, add the new monitor to the list
-		if (*head == nullptr) {
-			*head = new_placement;
-			return TRUE;
-		}
-
-		if (mi.dwFlags & MONITORINFOF_PRIMARY) {
-				new_placement->SetNextMonitor(*head);
-				*head = new_placement;
-		}
-		else {
-			MonitorList* current = *head;
-			if (!current) {
-				*head = new_placement;
-			}
-			else {
-				while (current->next_monitor) {
-					current = current->next_monitor;
-				}
-				current->SetNextMonitor(new_placement);
-			}
-		}
+// Add the window to the global list by the HWND and the Monitor
+// If the window is added successfully, return true
+bool AddWindowToList(HWND hWnd, Monitor *monitor) {
+	Window *current = head_window;
+	head_window = new Window(hWnd, monitor);
+	if (current != nullptr) {
+		head_window->SetNextWindow(current);
 	}
 
-	return TRUE;
+	return true;
 }
 
-bool InitializeMonitorList() {
-	if (!EnumDisplayMonitors(NULL, NULL, MonitorEnumProcToInitList, reinterpret_cast<LPARAM>(&primary_monitor))) {
-		return false;
+// Find the window in the global list by the HWND
+// If the window is found, return the window
+// Otherwise, return nullptr
+Window* FindWindowByHwnd(HWND hwnd) {
+    Window *current = head_window;
+    while (current) {
+        if (current->hwnd == hwnd) {
+            return current;
+        }
+        current = current->next_window; 
+    }
+    return nullptr; 
+}
+
+// Find the monitor in the global list by the HMONITOR
+// If the monitor is found, return the pointer to the monitor
+// Otherwise, return nullptr
+Monitor *FindMonitorByHmonitor(HMONITOR hMonitor) {
+	Monitor* current = primary_monitor;
+	while (current) {
+		if (current->hMonitor == hMonitor) {
+			return current;
+		}
+		current = current->next_monitor;
 	}
-	return true;
+
+	return nullptr;
 }
 

@@ -8,7 +8,8 @@
 #include "resource.h"
 #include "ConfigReader.h"
 #include "Config.h"
-#include "window.h"
+#include "Window.h"
+#include "Monitor.h"
 
 
 HMENU hMenu;
