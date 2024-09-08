@@ -8,8 +8,6 @@ struct Monitor {
 	Monitor* next_monitor = nullptr;
 	Monitor* prev_monitor = nullptr;
 	bool isPrimary = false;
-	int x_division_cnt = 0;
-	int y_division_cnt = 0;
 
 	Monitor(HMONITOR monitor) : hMonitor(monitor) {
 		this->mi.cbSize = sizeof(MONITORINFO); 	

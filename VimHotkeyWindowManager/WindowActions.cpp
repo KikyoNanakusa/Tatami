@@ -1,5 +1,34 @@
 #include "WindowActions.h"
 
+Window* EnsureWindowMonitorTracking(HWND hWnd = nullptr) {
+    if (hWnd == nullptr) {
+		// Get the window that is currently focused (foreground window
+		hWnd = GetForegroundWindow();
+		if (hWnd == NULL) return nullptr;
+    }
+
+    // Get the monitor information where the window is located
+	MONITORINFO monitorInfo = { sizeof(monitorInfo) };
+	HMONITOR hMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+	if (!GetMonitorInfo(hMonitor, &monitorInfo)) return nullptr;
+
+	// Check if the monitor is in the list
+    // TODO: Implement error handling (suggest reinitializing the monitor list)
+    Monitor *monitor = FindMonitorByHmonitor(hMonitor);
+	if (monitor == nullptr) {
+		return nullptr;
+	}
+
+	// Check if the window is in the list, if not, add it
+	Window *window = FindWindowByHwnd(hWnd);
+	if (window == nullptr) {
+		AddWindowToList(hWnd, monitor);
+		window = head_window;
+	}
+
+    return window;
+}
+
 bool MinimizeWindow(HWND hWnd, HWND& minimizedWindow) {
     minimizedWindow = hWnd;
     return ShowWindow(hWnd, SW_MINIMIZE);
@@ -122,15 +151,13 @@ bool MoveWindowToLeft(Window *window, const RECT& windowRect) {
         return MoveWindowToOtherMonitor(window, windowRect, false);
     }
 
-    int monitorWidth = GetMonitorWorkWidth(window->monitor->mi);
-    int monitorHeight = GetMonitorWorkHeight(window->monitor->mi);
     BOOL ret = SetWindowPos(
         window->hWnd, 
         NULL, 
         window->monitor->mi.rcWork.left, 
         window->monitor->mi.rcWork.top, 
-        monitorWidth / 2, 
-        monitorHeight, 
+        GetMonitorWorkWidth(window->monitor->mi) / 2,
+        GetMonitorWorkHeight(window->monitor->mi),
         SWP_NOZORDER
     );
 
@@ -152,14 +179,13 @@ bool MoveWindowToRight(Window *window, const RECT& windowRect) {
     if (windowRect.right >= window->monitor->mi.rcWork.right) return MoveWindowToOtherMonitor(window, windowRect, true);
 
     int monitorWidth = GetMonitorWorkWidth(window->monitor->mi);
-    int monitorHeight = GetMonitorWorkHeight(window->monitor->mi);
 	BOOL ret = SetWindowPos(
         window->hWnd, 
         NULL, 
         window->monitor->mi.rcWork.left + monitorWidth / 2, 
         window->monitor->mi.rcWork.top, 
         monitorWidth / 2, 
-        monitorHeight, 
+        GetMonitorWorkHeight(window->monitor->mi),
         SWP_NOZORDER
     );
 
@@ -241,27 +267,10 @@ bool MoveFocusedWindow(int moveType, HWND& lastMinimizedWindow) {
 		ShowWindow(hWnd, SW_MAXIMIZE);
 	}
 
+    Window *window = EnsureWindowMonitorTracking(hWnd);
+    if (window == nullptr) return false;
 
-    // ウィンドウがあるモニターの情報を取得
-    MONITORINFO monitorInfo = { sizeof(monitorInfo) };
-    HMONITOR hMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
-    if (!GetMonitorInfo(hMonitor, &monitorInfo)) return false;
-    
-    // モニターがリストにあるか確認
-    // TODO: Implement error handling (suggest reinitializing the monitor list)
-    Monitor *monitor = FindMonitorByHmonitor(hMonitor);
-    if (monitor == nullptr) {
-        return false;
-	}
-
-    // ウィンドウがリストにあるか確認、無ければ追加
-    Window *window = FindWindowByHwnd(hWnd);
-    if (window == nullptr) {
-        AddWindowToList(hWnd, monitor);
-        window = head_window;
-    }
-
-    // ウィンドウの位置とサイズを取得
+    // Get the window information
     RECT rect;
     GetWindowRect(hWnd, &rect);
 
@@ -273,4 +282,41 @@ bool MoveFocusedWindow(int moveType, HWND& lastMinimizedWindow) {
         case HOTKEY_UP: return MoveWindowToUp(window, rect); break;
 		default: return UNKNOWN_HOTKEY;
     }
+}
+
+bool ChangeFocusToLeft(Window* window) {
+    if (window->left_window == nullptr) return false;
+
+    return SetForegroundWindow(window->left_window->hWnd);
+}
+
+bool ChangeFocusToRight(Window* window) {
+	if (window->right_window == nullptr) return false;
+
+	return SetForegroundWindow(window->right_window->hWnd);
+}
+
+bool ChangeFocusToUp(Window* window) {
+	if (window->top_window == nullptr) return false;
+
+	return SetForegroundWindow(window->top_window->hWnd);
+}
+
+bool ChangeFocusToDown(Window* window) {
+	if (window->bottom_window == nullptr) return false;
+
+	return SetForegroundWindow(window->bottom_window->hWnd);
+}
+
+bool ChangeFocusOfWindow(int moveType) {
+    Window* window = EnsureWindowMonitorTracking();
+    if (window == nullptr) return false;
+
+    switch (moveType) {
+        case HOTKEY_FOCUS_DOWN: return ChangeFocusToDown(window); break;
+		case HOTKEY_FOCUS_UP: return ChangeFocusToUp(window); break;
+		case HOTKEY_FOCUS_LEFT: return ChangeFocusToLeft(window); break;
+        case HOTKEY_FOCUS_RIGHT: return ChangeFocusToRight(window); break;
+    }
+
 }
