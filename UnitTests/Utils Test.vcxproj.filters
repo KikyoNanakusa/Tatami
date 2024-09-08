@@ -17,6 +17,9 @@
     <ClCompile Include="WindowTest.cpp">
       <Filter>Test</Filter>
     </ClCompile>
+    <ClCompile Include="MonitorTest.cpp">
+      <Filter>Test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />

@@ -2,8 +2,6 @@
 #include "pch.h"
 #include "Window.h"
 #include "Window.cpp"
-#include "Monitor.h"
-#include "Monitor.cpp"
 
 TEST(WindowStructTests, Constructor) {
 	HMONITOR hMonitor = (HMONITOR)1;
