@@ -14,6 +14,9 @@
     <ClCompile Include="ConfigReaderTest.cpp">
       <Filter>Test</Filter>
     </ClCompile>
+    <ClCompile Include="WindowTest.cpp">
+      <Filter>Test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />

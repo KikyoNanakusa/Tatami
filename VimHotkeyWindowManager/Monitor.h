@@ -26,4 +26,4 @@ extern Monitor* primary_monitor;
 
 BOOL CALLBACK MonitorEnumProcToInitList(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData);
 bool InitializeMonitorList();
-
+Monitor *FindMonitorByHmonitor(HMONITOR hMonitor);

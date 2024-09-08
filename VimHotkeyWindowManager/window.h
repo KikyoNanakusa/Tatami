@@ -82,7 +82,6 @@ struct Window {
 
 extern Window *head_window;
 
-Monitor *FindMonitorByHmonitor(HMONITOR hMonitor);
-bool AddWindowToList(HWND hWnd, Monitor* ml);
+bool AddWindowToList(HWND hWnd, Monitor* monitor);
 Window* FindWindowByHwnd(HWND hwnd);
 

@@ -64,3 +64,18 @@ bool InitializeMonitorList() {
 
 	return true;
 }
+
+// Find the monitor in the global list by the HMONITOR
+// If the monitor is found, return the pointer to the monitor
+// Otherwise, return nullptr
+Monitor *FindMonitorByHmonitor(HMONITOR hMonitor) {
+	Monitor* current = primary_monitor;
+	while (current) {
+		if (current->hMonitor == hMonitor) {
+			return current;
+		}
+		current = current->next_monitor;
+	}
+
+	return nullptr;
+}
