@@ -20,7 +20,15 @@ bool OnDestroy(HWND hWnd, NOTIFYICONDATA nid, HMENU hMenu)
 		current = next;
 	}
 
-	// Destroy window
+	// Destroy window list
+	Window* current_window = head_window;
+	while (current_window) {
+		Window* next_window = current_window->next_window;
+		delete current_window;
+		current_window = next_window;
+	}
+
+	// Destroy window ( tasktray icon )
 	DestroyWindow(hWnd);
 	Shell_NotifyIcon(NIM_DELETE, &nid);
 	DestroyMenu(hMenu);

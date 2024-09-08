@@ -12,5 +12,5 @@ bool MoveFocusedWindow(int moveType, HWND& minimizedWindow);
 bool MinimizeWindow(HWND hWnd, HWND& minimizedWindow);
 bool RestoreWindow(HWND& minimizedWindow);
 bool AdjustWindowPosition(HWND hWnd, const MONITORINFO& mi, const RECT& windowRect, bool moveToRight);
-bool MoveWindowToLeft(HWND hWnd, const MONITORINFO& mi, const RECT& windowRect);
-bool MoveWindowToRight(HWND hWnd, const MONITORINFO& mi, const RECT& windowRect);
+bool MoveWindowToLeft(Window *window, const RECT& windowRect);
+bool MoveWindowToRight(Window *window, const MONITORINFO& mi, const RECT& windowRect);

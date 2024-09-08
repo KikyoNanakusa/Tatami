@@ -19,7 +19,7 @@ enum VerticalAlignment {
 };
 
 struct Window {
-    HWND hwnd;
+    HWND hWnd;
     Monitor *monitor;
 
     Window* left_window = nullptr;
@@ -35,7 +35,7 @@ struct Window {
     Window* prev_window = nullptr;
 
     Window(HWND hwnd, Monitor* monitor) 
-        : hwnd(hwnd), monitor(monitor) {}
+        : hWnd(hwnd), monitor(monitor) {}
 
     void SetLeftWindow(Window* window) {
         left_window = window;

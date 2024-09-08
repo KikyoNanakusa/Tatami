@@ -11,7 +11,7 @@ TEST(WindowStructTests, Constructor) {
 	Monitor *monitor = new Monitor(hMonitor);
 	Window window = Window(hWnd, monitor);
 
-	EXPECT_EQ(hWnd, window.hwnd);
+	EXPECT_EQ(hWnd, window.hWnd);
 	EXPECT_EQ(monitor, window.monitor);
 }
 
@@ -30,7 +30,7 @@ TEST(WindowStructTests, AddWindow) {
 
 	AddWindowToList((HWND)4, monitor2);
 
-	EXPECT_EQ(hWnd2, head_window->hwnd);
+	EXPECT_EQ(hWnd2, head_window->hWnd);
 	EXPECT_EQ(monitor2, head_window->monitor);
 	EXPECT_EQ(&window, head_window->next_window);
 }

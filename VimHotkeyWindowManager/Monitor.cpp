@@ -10,33 +10,28 @@ Monitor *primary_monitor = nullptr;
 BOOL CALLBACK MonitorEnumProcToInitList(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData) {
 	Monitor** head = reinterpret_cast<Monitor**>(dwData);
 
-	MONITORINFO mi = {};
-	mi.cbSize = sizeof(mi);
-	if (GetMonitorInfo(hMonitor, &mi)) {
-		Monitor* new_placement = new Monitor(hMonitor);
+	Monitor* new_placement = new Monitor(hMonitor);
 
-		// if there is no monitor in the list, add the new monitor to the list
-		if (*head == nullptr) {
+	if (*head == nullptr) {
+		*head = new_placement;
+		return TRUE;
+	}
+
+	if (new_placement->isPrimary) {
+			new_placement->SetNextMonitor(*head);
+			new_placement->isPrimary = true;
 			*head = new_placement;
-			return TRUE;
-		}
-
-		if (mi.dwFlags & MONITORINFOF_PRIMARY) {
-				new_placement->SetNextMonitor(*head);
-				new_placement->isPrimary = true;
-				*head = new_placement;
+	}
+	else {
+		Monitor* current = *head;
+		if (!current) {
+			*head = new_placement;
 		}
 		else {
-			Monitor* current = *head;
-			if (!current) {
-				*head = new_placement;
+			while (current->next_monitor) {
+				current = current->next_monitor;
 			}
-			else {
-				while (current->next_monitor) {
-					current = current->next_monitor;
-				}
-				current->SetNextMonitor(new_placement);
-			}
+			current->SetNextMonitor(new_placement);
 		}
 	}
 
@@ -53,14 +48,12 @@ bool InitializeMonitorList() {
 	}
 
 	// Set the previous monitor of the primary monitor to the last monitor
-	Monitor* last_monitor = primary_monitor;
+	Monitor *last_monitor = primary_monitor;
 	while (last_monitor->next_monitor) {
 		last_monitor = last_monitor->next_monitor;
 	}
 
-	if (last_monitor != primary_monitor) {
-		primary_monitor->SetPrevMonitor(last_monitor);
-	}
+	primary_monitor->SetPrevMonitor(last_monitor);
 
 	return true;
 }

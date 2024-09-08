@@ -3,13 +3,21 @@
 
 struct Monitor {
 	HMONITOR hMonitor;
+	MONITORINFO mi;
+
 	Monitor* next_monitor = nullptr;
 	Monitor* prev_monitor = nullptr;
 	bool isPrimary = false;
 	int x_division_cnt = 0;
 	int y_division_cnt = 0;
 
-	Monitor(HMONITOR monitor) : hMonitor(monitor) {}
+	Monitor(HMONITOR monitor) : hMonitor(monitor) {
+		this->mi.cbSize = sizeof(MONITORINFO); 	
+
+		// TODO: Implement error handling
+		GetMonitorInfo(hMonitor, &mi);
+		isPrimary = mi.dwFlags & MONITORINFOF_PRIMARY;
+	}
 
 	void SetNextMonitor(Monitor *next) {
 		next_monitor = next;

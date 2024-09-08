@@ -52,83 +52,130 @@ std::pair<int, int> CalculateNewSizeForMonitor(const RECT& windowRect, const MON
 }
 
 
-bool MoveWindowToOtherMonitor(HWND hwnd, const MONITORINFO& mi, const RECT& windowRect, bool isMoveWindowNextMonitor) {
-    HMONITOR hTargetMonitor = NULL;
+bool MoveWindowToOtherMonitor(Window *window, const RECT& windowRect, bool isMoveWindowNextMonitor) {
+    Monitor* targetMonitor = nullptr;
     if (isMoveWindowNextMonitor) {
-		hTargetMonitor = GetNextMonitor(hwnd);
-		if (hTargetMonitor == NULL) return false;
+		targetMonitor = window->monitor->next_monitor;
+        if (targetMonitor == nullptr) return false;
     }
     else {
-		hTargetMonitor = GetPreviousMonitor(hwnd);
-		if (hTargetMonitor == NULL) return false;
+		targetMonitor = window->monitor->prev_monitor;
+		if (targetMonitor == nullptr) return false;
 	}
 
-	MONITORINFO miNext = { sizeof(miNext) };
-	if (!GetMonitorInfo(hTargetMonitor, &miNext)) return false;
+    std::pair<int, int> newSize = CalculateNewSizeForMonitor(windowRect, window->monitor->mi, targetMonitor->mi);
 
-    std::pair<int, int> newSize = CalculateNewSizeForMonitor(windowRect, mi, miNext);
-
-    int newLeft = miNext.rcWork.left;
+    int newLeft = targetMonitor->mi.rcWork.left;
     
-	return SetWindowPos(hwnd, NULL, newLeft, miNext.rcWork.top, newSize.first, newSize.second, SWP_NOZORDER);
+    BOOL ret = SetWindowPos(window->hWnd, NULL, newLeft, 
+        targetMonitor->mi.rcWork.top, newSize.first, newSize.second, SWP_NOZORDER);
+    if (ret) {
+		window->monitor = targetMonitor;
+	}
+	return ret;
 }
 
-bool MoveMaximizedWindow(HWND hWnd, const MONITORINFO& mi, bool isMoveToLeft) {
-    ShowWindow(hWnd, SW_RESTORE);
-    int monitorWidth = GetMonitorWorkWidth(mi);
-    int monitorHeight = GetMonitorWorkHeight(mi);
+bool MoveMaximizedWindow(Window *window, bool isMoveToLeft) {
+    ShowWindow(window->hWnd, SW_RESTORE);
+    int monitorWidth = GetMonitorWorkWidth(window->monitor->mi);
+    int monitorHeight = GetMonitorWorkHeight(window->monitor->mi);
     if (isMoveToLeft) {
-        return SetWindowPos(hWnd, NULL, mi.rcWork.left, mi.rcWork.top, monitorWidth / 2, monitorHeight, SWP_NOZORDER);
+        return SetWindowPos(
+            window->hWnd, 
+            NULL, 
+            window->monitor->mi.rcWork.left, 
+            window->monitor->mi.rcWork.top, 
+            monitorWidth / 2, 
+            monitorHeight, SWP_NOZORDER
+        );
     }
     else {
-		return SetWindowPos(hWnd, NULL, mi.rcWork.left + monitorWidth / 2, mi.rcWork.top, monitorWidth / 2, monitorHeight, SWP_NOZORDER);
+		return SetWindowPos(
+            window->hWnd, 
+            NULL, 
+            window->monitor->mi.rcWork.left + monitorWidth / 2, 
+            window->monitor->mi.rcWork.top, 
+            monitorWidth / 2, 
+            monitorHeight, 
+            SWP_NOZORDER);
 	}
 }
 
-bool MoveWindowToLeft(HWND hWnd, const MONITORINFO& mi, const RECT& windowRect) {
+bool MoveWindowToLeft(Window *window, const RECT& windowRect) {
     WINDOWPLACEMENT wp;
     wp.length = sizeof(WINDOWPLACEMENT);
-    GetWindowPlacement(hWnd, &wp);
-    if (wp.showCmd == SW_MAXIMIZE) return MoveMaximizedWindow(hWnd, mi, true);
+    GetWindowPlacement(window->hWnd, &wp);
+    if (wp.showCmd == SW_MAXIMIZE) return MoveMaximizedWindow(window, true);
 
     // ウィンドウがモニターの左端にある場合、前のモニターに移動
-    if (windowRect.left <= mi.rcWork.left) {
-        return MoveWindowToOtherMonitor(hWnd, mi, windowRect, false);
+    if (windowRect.left <= window->monitor->mi.rcWork.left) {
+        return MoveWindowToOtherMonitor(window, windowRect, false);
     }
 
-    int monitorWidth = GetMonitorWorkWidth(mi);
-    int monitorHeight = GetMonitorWorkHeight(mi);
-    return SetWindowPos(hWnd, NULL, mi.rcWork.left, mi.rcWork.top, monitorWidth / 2, monitorHeight, SWP_NOZORDER);
+    int monitorWidth = GetMonitorWorkWidth(window->monitor->mi);
+    int monitorHeight = GetMonitorWorkHeight(window->monitor->mi);
+    return SetWindowPos(
+        window->hWnd, 
+        NULL, 
+        window->monitor->mi.rcWork.left, 
+        window->monitor->mi.rcWork.top, 
+        monitorWidth / 2, 
+        monitorHeight, 
+        SWP_NOZORDER
+    );
 }
 
-bool MoveWindowToRight(HWND hWnd, const MONITORINFO& mi, const RECT& windowRect) {
+bool MoveWindowToRight(Window *window, const RECT& windowRect) {
     WINDOWPLACEMENT wp;
     wp.length = sizeof(WINDOWPLACEMENT);
-    GetWindowPlacement(hWnd, &wp);
-    if (wp.showCmd == SW_MAXIMIZE) return MoveMaximizedWindow(hWnd, mi, false);
+    GetWindowPlacement(window->hWnd, &wp);
+    if (wp.showCmd == SW_MAXIMIZE) return MoveMaximizedWindow(window, false);
 
     // ウィンドウがモニターの右端にある場合、次のモニターに移動
-    if (windowRect.right >= mi.rcWork.right) return MoveWindowToOtherMonitor(hWnd, mi, windowRect, true);
+    if (windowRect.right >= window->monitor->mi.rcWork.right) return MoveWindowToOtherMonitor(window, windowRect, true);
 
-    int monitorWidth = GetMonitorWorkWidth(mi);
-    int monitorHeight = GetMonitorWorkHeight(mi);
-	return SetWindowPos(hWnd, NULL, mi.rcWork.left + monitorWidth / 2, mi.rcWork.top, monitorWidth / 2, monitorHeight, SWP_NOZORDER);
+    int monitorWidth = GetMonitorWorkWidth(window->monitor->mi);
+    int monitorHeight = GetMonitorWorkHeight(window->monitor->mi);
+	return SetWindowPos(
+        window->hWnd, 
+        NULL, 
+        window->monitor->mi.rcWork.left + monitorWidth / 2, 
+        window->monitor->mi.rcWork.top, 
+        monitorWidth / 2, 
+        monitorHeight, 
+        SWP_NOZORDER
+    );
 }
 
-bool MoveWindowToDown(HWND hWnd, const MONITORINFO& mi, const RECT& windowRect) {
-	int monitorWidth = GetMonitorWorkWidth(mi);
-	int monitorHeight = GetMonitorWorkHeight(mi);
-	return SetWindowPos(hWnd, NULL, windowRect.left, mi.rcWork.top + monitorHeight / 2, windowRect.right - windowRect.left, monitorHeight / 2, SWP_NOZORDER);
+bool MoveWindowToDown(Window *window, const RECT& windowRect) {
+	int monitorWidth = GetMonitorWorkWidth(window->monitor->mi);
+	int monitorHeight = GetMonitorWorkHeight(window->monitor->mi);
+	return SetWindowPos(
+        window->hWnd, 
+        NULL, windowRect.left, 
+        window->monitor->mi.rcWork.top + monitorHeight / 2, 
+        windowRect.right - windowRect.left, 
+        monitorHeight / 2, 
+        SWP_NOZORDER
+    );
 }
 
-bool MoveWindowToUp(HWND hWnd, const MONITORINFO& mi, const RECT& windowRect) {
-	int monitorWidth = GetMonitorWorkWidth(mi);
-	int monitorHeight = GetMonitorWorkHeight(mi);
-	return SetWindowPos(hWnd, NULL, windowRect.left, mi.rcWork.top, windowRect.right - windowRect.left, monitorHeight / 2, SWP_NOZORDER);
+bool MoveWindowToUp(Window *window, const RECT& windowRect) {
+	int monitorWidth = GetMonitorWorkWidth(window->monitor->mi);
+	int monitorHeight = GetMonitorWorkHeight(window->monitor->mi);
+	return SetWindowPos(
+        window->hWnd, 
+        NULL, 
+        windowRect.left, 
+        window->monitor->mi.rcWork.top, 
+        windowRect.right - windowRect.left, 
+        monitorHeight / 2, 
+        SWP_NOZORDER
+    );
 }
 
-bool MaximizeWindow(HWND hWnd, const MONITORINFO& mi) {
-	return SetWindowPos(hWnd, NULL, mi.rcWork.left, mi.rcWork.top, GetMonitorWorkWidth(mi), GetMonitorWorkHeight(mi), SWP_NOZORDER);
+bool MaximizeWindow(Window *window, const MONITORINFO& mi) {
+	return SetWindowPos(window->hWnd, NULL, mi.rcWork.left, mi.rcWork.top, GetMonitorWorkWidth(mi), GetMonitorWorkHeight(mi), SWP_NOZORDER);
 }
 
 bool MoveFocusedWindow(int moveType, HWND& lastMinimizedWindow) {
@@ -169,11 +216,11 @@ bool MoveFocusedWindow(int moveType, HWND& lastMinimizedWindow) {
     GetWindowRect(hWnd, &rect);
 
     switch (moveType) {
-        case HOTKEY_MAXIMIZE: return MaximizeWindow(hWnd, monitorInfo); break;
-		case HOTKEY_LEFT: return MoveWindowToLeft(hWnd, monitorInfo, rect); break;
-        case HOTKEY_RIGHT: return MoveWindowToRight(hWnd, monitorInfo, rect); break;
-        case HOTKEY_DOWN: return MoveWindowToDown(hWnd, monitorInfo, rect); break;
-        case HOTKEY_UP: return MoveWindowToUp(hWnd, monitorInfo, rect); break;
+        case HOTKEY_MAXIMIZE: return MaximizeWindow(window, monitorInfo); break;
+		case HOTKEY_LEFT: return MoveWindowToLeft(window, rect); break;
+        case HOTKEY_RIGHT: return MoveWindowToRight(window, rect); break;
+        case HOTKEY_DOWN: return MoveWindowToDown(window, rect); break;
+        case HOTKEY_UP: return MoveWindowToUp(window, rect); break;
 		default: return UNKNOWN_HOTKEY;
     }
 }

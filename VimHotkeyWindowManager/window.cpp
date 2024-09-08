@@ -21,7 +21,7 @@ bool AddWindowToList(HWND hWnd, Monitor *monitor) {
 Window* FindWindowByHwnd(HWND hwnd) {
     Window *current = head_window;
     while (current) {
-        if (current->hwnd == hwnd) {
+        if (current->hWnd == hwnd) {
             return current;
         }
         current = current->next_window; 
