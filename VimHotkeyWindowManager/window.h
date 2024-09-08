@@ -8,14 +8,14 @@ enum HorizontalAlignment {
     HA_FREE,
     HA_LEFT,
     HA_CENTER,
-    HA_RIGHT
+    HA_RIGHT,
 };
 
 enum VerticalAlignment {
     VA_FREE,
     VA_TOP,
     VA_CENTER,
-    VA_BOTTOM
+    VA_BOTTOM,
 };
 
 struct Window {

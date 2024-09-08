@@ -1,5 +1,10 @@
 #include "HotkeyManager.h"
 
+bool isMoveWindowHotkey(UINT message) {
+	return message == HOTKEY_LEFT || message == HOTKEY_DOWN || message == HOTKEY_UP || message == HOTKEY_RIGHT ||
+		message == HOTKEY_MAXIMIZE || message == HOTKEY_MINIMIZE || message == HOTKEY_RESTORE;
+}
+
 void RegisterHotKeys(HWND hWnd, Config* config) {
     if (!config) {
        	MessageBox(hWnd, L"Invalid config pointer", L"Error", MB_ICONERROR);
