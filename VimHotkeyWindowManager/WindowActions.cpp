@@ -356,7 +356,7 @@ bool MoveFocusToDown(Window* window) {
     }
 
     if (window->monitor->bottom_window == nullptr) return false;
-	return SetForegroundWindow(window->bottom_window->hWnd);
+	return SetForegroundWindow(window->monitor->bottom_window->hWnd);
 }
 
 bool MoveFocus(UINT moveType) {

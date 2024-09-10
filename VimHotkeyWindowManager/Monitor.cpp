@@ -3,6 +3,59 @@
 // Global List of Monitors
 Monitor *primary_monitor = nullptr;
 
+
+// Constructor of the Monitor struct
+Monitor::Monitor(HMONITOR monitor) : hMonitor(monitor) {
+	this->mi.cbSize = sizeof(MONITORINFO);
+
+	// TODO: Implement error handling
+	GetMonitorInfo(hMonitor, &mi);
+	isPrimary = mi.dwFlags & MONITORINFOF_PRIMARY;
+}
+
+// Set the next monitor of the monitor
+// Prev monitor of the next monitor is set to the monitor
+void Monitor::SetNextMonitor(Monitor* next) {
+	next_monitor = next;
+	if (next) next->prev_monitor = this;
+}
+
+// Set the previous monitor of the monitor
+// Next monitor of the previous monitor is set to the monitor
+void Monitor::SetPrevMonitor(Monitor* prev) {
+	prev_monitor = prev;
+	prev->next_monitor = this;
+}
+
+// Remove all window(s) pointer from the monitor struct
+void Monitor::UnmapWindow(Window* window) {
+	if (window == left_window) {
+		left_window = nullptr;
+	}
+	else if (window == right_window) {
+		right_window = nullptr;
+	}
+	else if (window == top_window) {
+		top_window = nullptr;
+	}
+	else if (window == bottom_window) {
+		bottom_window = nullptr;
+	}
+	else if (window == top_left_window) {
+		top_left_window = nullptr;
+	}
+	else if (window == top_right_window) {
+		top_right_window = nullptr;
+	}
+	else if (window == bottom_left_window) {
+		bottom_left_window = nullptr;
+	}
+	else if (window == bottom_right_window) {
+		bottom_right_window = nullptr;
+	}
+}
+
+
 // This is a callback function for EnumDisplayMonitors
 // Enumerate all the monitors and add them to the global list
 // If the monitor is the primary monitor, add it to the head of the list
