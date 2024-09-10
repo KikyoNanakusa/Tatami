@@ -103,6 +103,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				if (isMoveWindowHotkey(wParam)) {
 					MoveFocusedWindow(wParam, minimizedWindow);
 				}
+				else {
+					MoveFocus(wParam);
+				}
 			}
 			break;
 		case WM_CONTEXTMENU:

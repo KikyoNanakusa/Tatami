@@ -12,13 +12,19 @@ void RegisterHotKeys(HWND hWnd, Config* config) {
 		return;
     }
 
-    if (!RegisterHotKey(hWnd, HOTKEY_LEFT, MOD_ALT | MOD_SHIFT, config->getConfigValue(ACTION_MOVE_WINDOW_LEFT)) ||
-        !RegisterHotKey(hWnd, HOTKEY_DOWN, MOD_ALT | MOD_SHIFT, config->getConfigValue(ACTION_MOVE_WINDOW_DOWN)) ||
-        !RegisterHotKey(hWnd, HOTKEY_UP, MOD_ALT | MOD_SHIFT, config->getConfigValue(ACTION_MOVE_WINDOW_UP)) ||
-        !RegisterHotKey(hWnd, HOTKEY_RIGHT, MOD_ALT | MOD_SHIFT, config->getConfigValue(ACTION_MOVE_WINDOW_RIGHT)) ||
-        !RegisterHotKey(hWnd, HOTKEY_MINIMIZE, MOD_ALT | MOD_SHIFT, config->getConfigValue(ACTION_WINDOW_MINIMIZE)) ||
-        !RegisterHotKey(hWnd, HOTKEY_RESTORE, MOD_ALT | MOD_SHIFT, config->getConfigValue(ACTION_WINDOW_RESTORE)) ||
-        !RegisterHotKey(hWnd, HOTKEY_MAXIMIZE, MOD_ALT | MOD_SHIFT, config->getConfigValue(ACTION_WINDOW_MAXIMIZE))) {
+	if (!RegisterHotKey(hWnd, HOTKEY_LEFT, MOD_ALT | MOD_SHIFT, config->getConfigValue(ACTION_MOVE_WINDOW_LEFT)) ||
+		!RegisterHotKey(hWnd, HOTKEY_DOWN, MOD_ALT | MOD_SHIFT, config->getConfigValue(ACTION_MOVE_WINDOW_DOWN)) ||
+		!RegisterHotKey(hWnd, HOTKEY_UP, MOD_ALT | MOD_SHIFT, config->getConfigValue(ACTION_MOVE_WINDOW_UP)) ||
+		!RegisterHotKey(hWnd, HOTKEY_RIGHT, MOD_ALT | MOD_SHIFT, config->getConfigValue(ACTION_MOVE_WINDOW_RIGHT)) ||
+		!RegisterHotKey(hWnd, HOTKEY_MINIMIZE, MOD_ALT | MOD_SHIFT, config->getConfigValue(ACTION_WINDOW_MINIMIZE)) ||
+		!RegisterHotKey(hWnd, HOTKEY_RESTORE, MOD_ALT | MOD_SHIFT, config->getConfigValue(ACTION_WINDOW_RESTORE)) ||
+		!RegisterHotKey(hWnd, HOTKEY_MAXIMIZE, MOD_ALT | MOD_SHIFT, config->getConfigValue(ACTION_WINDOW_MAXIMIZE)) ||
+		!RegisterHotKey(hWnd, HOTKEY_FOCUS_LEFT, MOD_ALT, getVkCodeFromChar('H')) ||
+		!RegisterHotKey(hWnd, HOTKEY_FOCUS_DOWN, MOD_ALT, getVkCodeFromChar('J')) ||
+		!RegisterHotKey(hWnd, HOTKEY_FOCUS_UP, MOD_ALT, getVkCodeFromChar('K')) ||
+		!RegisterHotKey(hWnd, HOTKEY_FOCUS_RIGHT, MOD_ALT, getVkCodeFromChar('L')) 
+		)
+	{
 		
 		MessageBox(hWnd, L"ホットキーの登録に失敗しました。プログラムを終了します。", L"エラー", MB_ICONERROR);
 		UnRegisterHotKeys(hWnd);

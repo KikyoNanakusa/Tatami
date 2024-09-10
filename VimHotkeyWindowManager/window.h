@@ -9,6 +9,7 @@ enum HorizontalAlignment {
     HA_LEFT,
     HA_CENTER,
     HA_RIGHT,
+    HA_MAXIMIZE,
 };
 
 enum VerticalAlignment {
@@ -16,6 +17,7 @@ enum VerticalAlignment {
     VA_TOP,
     VA_CENTER,
     VA_BOTTOM,
+    VA_MAXIMIZE,
 };
 
 struct Window {
