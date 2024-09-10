@@ -8,6 +8,8 @@
 #include "resource.h"
 #include "ConfigReader.h"
 #include "Config.h"
+#include "Window.h"
+#include "Monitor.h"
 
 
 HMENU hMenu;
@@ -34,6 +36,12 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 {
 	HWND hWnd;
 	MSG msg;
+
+	// モニター情報を取得
+	if (!InitializeMonitorList()) {
+		MessageBox(NULL, TEXT("Failed to initialize monitor list"), TEXT("ERROR"), MB_OK);
+		return 1;
+	}
 
 	// 設定ファイルを読む
 	std::string configString = ReadConfigFile();
@@ -92,7 +100,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 		case WM_HOTKEY:
 			if (isEnabled) {
-				MoveFocusedWindow(wParam, minimizedWindow);
+				if (isMoveWindowHotkey(wParam)) {
+					MoveFocusedWindow(wParam, minimizedWindow);
+				}
+				else {
+					MoveFocus(wParam);
+				}
 			}
 			break;
 		case WM_CONTEXTMENU:

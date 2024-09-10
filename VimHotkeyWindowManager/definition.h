@@ -9,6 +9,10 @@
 #define HOTKEY_MINIMIZE 5
 #define HOTKEY_RESTORE 6
 #define HOTKEY_MAXIMIZE 7
+#define HOTKEY_FOCUS_LEFT 8
+#define HOTKEY_FOCUS_RIGHT 9
+#define HOTKEY_FOCUS_UP 10
+#define HOTKEY_FOCUS_DOWN 11
 
 #define MENU_ACTIVATE 0x1
 #define MENU_EXIT 0x2
@@ -17,6 +21,7 @@
 
 #define UNKNOWN_HOTKEY 0x2
 
+// Used for configuration
 enum Action {
 	ACTION_MOVE_WINDOW_LEFT,
 	ACTION_MOVE_WINDOW_DOWN,
@@ -27,6 +32,7 @@ enum Action {
 	ACTION_WINDOW_MAXIMIZE
 };
 
+// Default configuration text
 const std::string DefaultConfig = "MoveWindowLeft=H\n"
 								  "MoveWindowDown=J\n"
 								  "MoveWindowUp=K\n"

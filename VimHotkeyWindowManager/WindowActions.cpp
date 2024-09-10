@@ -1,12 +1,46 @@
 #include "WindowActions.h"
 
-bool MinimizeWindow(HWND hWnd, HWND& minimizedWindow) {
-    minimizedWindow = hWnd;
-    return ShowWindow(hWnd, SW_MINIMIZE);
+Window* EnsureWindowMonitorTracking(HWND hWnd = nullptr) {
+    if (hWnd == nullptr) {
+		// Get the window that is currently focused (foreground window
+		hWnd = GetForegroundWindow();
+		if (hWnd == NULL) return nullptr;
+    }
+
+    // Get the monitor information where the window is located
+	MONITORINFO monitorInfo = { sizeof(monitorInfo) };
+	HMONITOR hMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+	if (!GetMonitorInfo(hMonitor, &monitorInfo)) return nullptr;
+
+	// Check if the monitor is in the list
+    // TODO: Implement error handling (suggest reinitializing the monitor list)
+    Monitor *monitor = FindMonitorByHmonitor(hMonitor);
+	if (monitor == nullptr) {
+		return nullptr;
+	}
+
+	// Check if the window is in the list, if not, add it
+	Window *window = FindWindowByHwnd(hWnd);
+	if (window == nullptr) {
+		AddWindowToList(hWnd, monitor);
+		window = head_window;
+	}
+
+    return window;
+}
+
+bool MinimizeWindow(Window *window, HWND& minimizedWindow) {
+    minimizedWindow = window->hWnd;
+    BOOL ret = ShowWindow(window->hWnd, SW_MINIMIZE);
+    if (ret) {
+		window->monitor->UnmapWindow(window);
+	}
+
+    return (bool)ret;
 }
 
 bool RestoreWindow(HWND& minimizedWindow) {
-    if (minimizedWindow == NULL) return NO_MINIMIZED_WINDOW;
+    if (minimizedWindow == NULL) return false;
     bool ret = ShowWindow(minimizedWindow, SW_RESTORE);
     minimizedWindow = NULL;
     return ret;
@@ -32,111 +66,239 @@ bool AdjustWindowPosition(HWND hWnd, const MONITORINFO& mi, const RECT& windowRe
     return SetWindowPos(hWnd, NULL, newX, newY, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
 }
 
-std::pair<int, int> CalculateNewSizeForMonitor(const RECT& windowRect, const MONITORINFO& originMonitorInfo, const MONITORINFO& nextMonitorInfo) {
-    int windowWidth = windowRect.right - windowRect.left;
-    int windowHeight = windowRect.bottom - windowRect.top;
-
-    int origMonitorWidth = GetMonitorWorkWidth(originMonitorInfo);
-    int origMonitorHeight = GetMonitorWorkHeight(originMonitorInfo);
-
-    int nextMonitorWidth = GetMonitorWorkWidth(nextMonitorInfo);
-    int nextMonitorHeight = GetMonitorWorkHeight(nextMonitorInfo);
-
-    float widthRatio = static_cast<float>(nextMonitorWidth) / origMonitorWidth;
-    float heightRatio = static_cast<float>(nextMonitorHeight) / origMonitorHeight;
-
-    int newWidth = static_cast<int>(windowWidth * widthRatio);
-    int newHeight = static_cast<int>(windowHeight * heightRatio);
-
-    return std::make_pair(newWidth, newHeight);
-}
-
-
-bool MoveWindowToOtherMonitor(HWND hwnd, const MONITORINFO& mi, const RECT& windowRect, bool isMoveWindowNextMonitor) {
-    HMONITOR hTargetMonitor = NULL;
+bool MoveWindowToOtherMonitor(Window *window, const RECT& windowRect, bool isMoveWindowNextMonitor) {
+    Monitor* targetMonitor = nullptr;
     if (isMoveWindowNextMonitor) {
-		hTargetMonitor = GetNextMonitor(hwnd);
-		if (hTargetMonitor == NULL) return false;
+		targetMonitor = window->monitor->next_monitor;
+        if (targetMonitor == nullptr) return false;
     }
     else {
-		hTargetMonitor = GetPreviousMonitor(hwnd);
-		if (hTargetMonitor == NULL) return false;
+		targetMonitor = window->monitor->prev_monitor;
+		if (targetMonitor == nullptr) return false;
 	}
 
-	MONITORINFO miNext = { sizeof(miNext) };
-	if (!GetMonitorInfo(hTargetMonitor, &miNext)) return false;
-
-    std::pair<int, int> newSize = CalculateNewSizeForMonitor(windowRect, mi, miNext);
-
-    int newLeft = miNext.rcWork.left;
+    int targetMonitorLeft = targetMonitor->mi.rcWork.left;
     
-	return SetWindowPos(hwnd, NULL, newLeft, miNext.rcWork.top, newSize.first, newSize.second, SWP_NOZORDER);
+    // To absorb the difference of the Dpi of the monitors, it is necessary to convert the coordinates of the window to the target monitor
+    BOOL ret = SetWindowPos(
+        window->hWnd, NULL, 
+        targetMonitorLeft, 
+        targetMonitor->mi.rcWork.top, 
+        1, 
+        1, 
+        SWP_NOZORDER
+    );
+
+    ret = SetWindowPos(
+        window->hWnd, NULL, 
+        targetMonitorLeft, 
+        targetMonitor->mi.rcWork.top, 
+        GetMonitorWorkWidth(targetMonitor->mi) / 2,
+        GetMonitorWorkHeight(targetMonitor->mi),
+        SWP_NOZORDER
+    );
+
+    if (ret) {
+		window->monitor = targetMonitor;
+        window->horizontal_alignment = HA_FREE;
+        window->vertical_alignment = VA_FREE;
+	}
+	return ret;
 }
 
-bool MoveMaximizedWindow(HWND hWnd, const MONITORINFO& mi, bool isMoveToLeft) {
-    ShowWindow(hWnd, SW_RESTORE);
-    int monitorWidth = GetMonitorWorkWidth(mi);
-    int monitorHeight = GetMonitorWorkHeight(mi);
+bool MoveMaximizedWindow(Window *window, bool isMoveToLeft) {
+    ShowWindow(window->hWnd, SW_RESTORE);
+    int monitorWidth = GetMonitorWorkWidth(window->monitor->mi);
+    int monitorHeight = GetMonitorWorkHeight(window->monitor->mi);
+
     if (isMoveToLeft) {
-        return SetWindowPos(hWnd, NULL, mi.rcWork.left, mi.rcWork.top, monitorWidth / 2, monitorHeight, SWP_NOZORDER);
+        BOOL ret = SetWindowPos(
+            window->hWnd, 
+            NULL, 
+            window->monitor->mi.rcWork.left, 
+            window->monitor->mi.rcWork.top, 
+            monitorWidth / 2, 
+            monitorHeight, 
+            SWP_NOZORDER
+        );
+
+        if (ret) {
+            window->isMaximized = false;
+			window->horizontal_alignment = HA_LEFT;
+            window->monitor->left_window = window;
+		}
+
+        return ret;
     }
     else {
-		return SetWindowPos(hWnd, NULL, mi.rcWork.left + monitorWidth / 2, mi.rcWork.top, monitorWidth / 2, monitorHeight, SWP_NOZORDER);
+		BOOL ret = SetWindowPos(
+            window->hWnd, 
+            NULL, 
+            window->monitor->mi.rcWork.left + monitorWidth / 2, 
+            window->monitor->mi.rcWork.top, 
+            monitorWidth / 2, 
+            monitorHeight, 
+            SWP_NOZORDER
+        );
+
+		if (ret) {
+            window->isMaximized = false;
+			window->horizontal_alignment = HA_RIGHT;
+            window->monitor->right_window = window;
+		}
+
+        return ret;
 	}
 }
 
-bool MoveWindowToLeft(HWND hWnd, const MONITORINFO& mi, const RECT& windowRect) {
-    WINDOWPLACEMENT wp;
+bool MoveWindowToLeft(Window *window, const RECT& windowRect) {
+    WINDOWPLACEMENT wp = {};
     wp.length = sizeof(WINDOWPLACEMENT);
-    GetWindowPlacement(hWnd, &wp);
-    if (wp.showCmd == SW_MAXIMIZE) return MoveMaximizedWindow(hWnd, mi, true);
+    GetWindowPlacement(window->hWnd, &wp);
+    if (wp.showCmd == SW_MAXIMIZE) return MoveMaximizedWindow(window, true);
 
     // ウィンドウがモニターの左端にある場合、前のモニターに移動
-    if (windowRect.left <= mi.rcWork.left) {
-        return MoveWindowToOtherMonitor(hWnd, mi, windowRect, false);
+    if (windowRect.left <= window->monitor->mi.rcWork.left) {
+        return MoveWindowToOtherMonitor(window, windowRect, false);
     }
 
-    int monitorWidth = GetMonitorWorkWidth(mi);
-    int monitorHeight = GetMonitorWorkHeight(mi);
-    return SetWindowPos(hWnd, NULL, mi.rcWork.left, mi.rcWork.top, monitorWidth / 2, monitorHeight, SWP_NOZORDER);
+    BOOL ret = SetWindowPos(
+        window->hWnd, 
+        NULL, 
+        window->monitor->mi.rcWork.left, 
+        window->monitor->mi.rcWork.top, 
+        GetMonitorWorkWidth(window->monitor->mi) / 2,
+        GetMonitorWorkHeight(window->monitor->mi),
+        SWP_NOZORDER
+    );
+
+    // Set the horizontal alignment to left if the window is moved to the left
+    if (ret) {
+		window->horizontal_alignment = HA_LEFT;
+        window->monitor->left_window = window;
+	}
+
+    return (bool)ret;
 }
 
-bool MoveWindowToRight(HWND hWnd, const MONITORINFO& mi, const RECT& windowRect) {
-    WINDOWPLACEMENT wp;
+bool MoveWindowToRight(Window *window, const RECT& windowRect) {
+    WINDOWPLACEMENT wp = {};
     wp.length = sizeof(WINDOWPLACEMENT);
-    GetWindowPlacement(hWnd, &wp);
-    if (wp.showCmd == SW_MAXIMIZE) return MoveMaximizedWindow(hWnd, mi, false);
+    GetWindowPlacement(window->hWnd, &wp);
+    if (wp.showCmd == SW_MAXIMIZE) return MoveMaximizedWindow(window, false);
 
     // ウィンドウがモニターの右端にある場合、次のモニターに移動
-    if (windowRect.right >= mi.rcWork.right) return MoveWindowToOtherMonitor(hWnd, mi, windowRect, true);
+    if (windowRect.right >= window->monitor->mi.rcWork.right) {
+        return MoveWindowToOtherMonitor(window, windowRect, true);
+    }
 
-    int monitorWidth = GetMonitorWorkWidth(mi);
-    int monitorHeight = GetMonitorWorkHeight(mi);
-	return SetWindowPos(hWnd, NULL, mi.rcWork.left + monitorWidth / 2, mi.rcWork.top, monitorWidth / 2, monitorHeight, SWP_NOZORDER);
+    int monitorWidth = GetMonitorWorkWidth(window->monitor->mi);
+	BOOL ret = SetWindowPos(
+        window->hWnd, 
+        NULL, 
+        window->monitor->mi.rcWork.left + monitorWidth / 2, 
+        window->monitor->mi.rcWork.top, 
+        monitorWidth / 2, 
+        GetMonitorWorkHeight(window->monitor->mi),
+        SWP_NOZORDER
+    );
+
+    if (ret) {
+        window->horizontal_alignment = HA_RIGHT;
+        window->monitor->right_window = window;
+    }
+
+    return (bool)ret;
 }
 
-bool MoveWindowToDown(HWND hWnd, const MONITORINFO& mi, const RECT& windowRect) {
-	int monitorWidth = GetMonitorWorkWidth(mi);
-	int monitorHeight = GetMonitorWorkHeight(mi);
-	return SetWindowPos(hWnd, NULL, windowRect.left, mi.rcWork.top + monitorHeight / 2, windowRect.right - windowRect.left, monitorHeight / 2, SWP_NOZORDER);
+bool MoveWindowToDown(Window *window, const RECT& windowRect) {
+	int monitorWidth = GetMonitorWorkWidth(window->monitor->mi);
+	int monitorHeight = GetMonitorWorkHeight(window->monitor->mi);
+
+	BOOL ret = SetWindowPos(
+        window->hWnd, 
+        NULL, windowRect.left, 
+        window->monitor->mi.rcWork.top + monitorHeight / 2, 
+        windowRect.right - windowRect.left, 
+        monitorHeight / 2, 
+        SWP_NOZORDER
+    );
+
+    if (ret) {
+		window->vertical_alignment = VA_BOTTOM;
+        if (window->monitor->left_window == window) {
+			window->monitor->bottom_left_window = window;
+        }
+        else if (window->monitor->right_window == window) {
+            window->monitor->bottom_right_window = window;
+        }
+        else {
+            window->monitor->bottom_window = window;
+        }
+	}
+    
+    return (bool)ret;
 }
 
-bool MoveWindowToUp(HWND hWnd, const MONITORINFO& mi, const RECT& windowRect) {
-	int monitorWidth = GetMonitorWorkWidth(mi);
-	int monitorHeight = GetMonitorWorkHeight(mi);
-	return SetWindowPos(hWnd, NULL, windowRect.left, mi.rcWork.top, windowRect.right - windowRect.left, monitorHeight / 2, SWP_NOZORDER);
+bool MoveWindowToUp(Window *window, const RECT& windowRect) {
+	int monitorWidth = GetMonitorWorkWidth(window->monitor->mi);
+	int monitorHeight = GetMonitorWorkHeight(window->monitor->mi);
+	BOOL ret = SetWindowPos(
+        window->hWnd, 
+        NULL, 
+        windowRect.left, 
+        window->monitor->mi.rcWork.top, 
+        windowRect.right - windowRect.left, 
+        monitorHeight / 2, 
+        SWP_NOZORDER
+    );
+
+    if (ret) {
+        window->vertical_alignment = VA_TOP;
+        if (window->monitor->left_window == window) {
+            window->monitor->top_left_window = window;
+		} else if (window->monitor->right_window == window) {
+			window->monitor->top_right_window = window;
+        }
+        else {
+            window->monitor->top_window = window;
+        }
+    }
+
+    return (bool)ret;
 }
 
-bool MaximizeWindow(HWND hWnd, const MONITORINFO& mi) {
-	return SetWindowPos(hWnd, NULL, mi.rcWork.left, mi.rcWork.top, GetMonitorWorkWidth(mi), GetMonitorWorkHeight(mi), SWP_NOZORDER);
+bool MaximizeWindow(Window *window) {
+	BOOL ret = SetWindowPos(
+        window->hWnd, 
+        NULL, 
+        window->monitor->mi.rcWork.left, 
+        window->monitor->mi.rcWork.top, 
+        GetMonitorWorkWidth(window->monitor->mi), 
+        GetMonitorWorkHeight(window->monitor->mi), 
+        SWP_NOZORDER
+    );
+
+    if (ret) {
+        window->isMaximized = true;
+        window->horizontal_alignment = HA_MAXIMIZE;
+        window->vertical_alignment = VA_MAXIMIZE;
+        window->monitor->UnmapWindow(window);
+    }
+
+    return (bool)ret;
 }
 
 bool MoveFocusedWindow(int moveType, HWND& lastMinimizedWindow) {
     HWND hWnd = GetForegroundWindow();
     if (hWnd == NULL) return false;
 
+    // Get the window information
+    Window *window = EnsureWindowMonitorTracking(hWnd);
+    if (window == nullptr) return false;
+
     if (moveType == HOTKEY_MINIMIZE) {
-        return MinimizeWindow(hWnd, lastMinimizedWindow);
+        return MinimizeWindow(window, lastMinimizedWindow);
     } else if (moveType == HOTKEY_RESTORE) {
         return RestoreWindow(lastMinimizedWindow);
     } else if (moveType == HOTKEY_MAXIMIZE) {
@@ -144,20 +306,69 @@ bool MoveFocusedWindow(int moveType, HWND& lastMinimizedWindow) {
 		ShowWindow(hWnd, SW_MAXIMIZE);
 	}
 
-    // ウィンドウがあるモニターの情報を取得
-    MONITORINFO monitorInfo = { sizeof(monitorInfo) };
-    if (!GetMonitorInfo(MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST), &monitorInfo)) return false;
 
-    // ウィンドウの位置とサイズを取得
+    // Get the window information
     RECT rect;
     GetWindowRect(hWnd, &rect);
 
     switch (moveType) {
-        case HOTKEY_MAXIMIZE: return MaximizeWindow(hWnd, monitorInfo); break;
-		case HOTKEY_LEFT: return MoveWindowToLeft(hWnd, monitorInfo, rect); break;
-        case HOTKEY_RIGHT: return MoveWindowToRight(hWnd, monitorInfo, rect); break;
-        case HOTKEY_DOWN: return MoveWindowToDown(hWnd, monitorInfo, rect); break;
-        case HOTKEY_UP: return MoveWindowToUp(hWnd, monitorInfo, rect); break;
-		default: return UNKNOWN_HOTKEY;
+        case HOTKEY_MAXIMIZE: return MaximizeWindow(window); break;
+		case HOTKEY_LEFT: return MoveWindowToLeft(window, rect); break;
+        case HOTKEY_RIGHT: return MoveWindowToRight(window, rect); break;
+        case HOTKEY_DOWN: return MoveWindowToDown(window, rect); break;
+        case HOTKEY_UP: return MoveWindowToUp(window, rect); break;
+		default: return false;
     }
+}
+
+bool MoveFocusToLeft(Window* window) {
+    if (window->isMaximized) return false;
+
+    if (window->monitor->left_window == nullptr) return false;
+    return SetForegroundWindow(window->monitor->left_window->hWnd);
+}
+
+bool MoveFocusToRight(Window* window) {
+    if (window->isMaximized) return false; 
+
+    if (window->monitor->left_window == nullptr) return false;
+	return SetForegroundWindow(window->monitor->right_window->hWnd);
+}
+
+bool MoveFocusToUp(Window* window) {
+    if (window->isMaximized) return false; 
+
+    if (window->monitor->bottom_left_window == window) {
+		if (window->monitor->top_left_window == nullptr) return false;
+		return SetForegroundWindow(window->monitor->top_left_window->hWnd);
+	}
+
+    if (window->monitor->top_window == nullptr) return false;
+	return SetForegroundWindow(window->monitor->top_window->hWnd);
+}
+
+bool MoveFocusToDown(Window* window) {
+    if (window->isMaximized) return false; 
+
+    if (window->monitor->top_left_window == window) {
+        if (window->monitor->bottom_left_window == nullptr) return false;
+        return SetForegroundWindow(window->monitor->bottom_left_window->hWnd);
+    }
+
+    if (window->monitor->bottom_window == nullptr) return false;
+	return SetForegroundWindow(window->monitor->bottom_window->hWnd);
+}
+
+bool MoveFocus(UINT moveType) {
+    Window* window = EnsureWindowMonitorTracking();
+    if (window == nullptr) return false;
+
+    switch (moveType) {
+        case HOTKEY_FOCUS_DOWN: return MoveFocusToDown(window); break;
+		case HOTKEY_FOCUS_UP: return MoveFocusToUp(window); break;
+		case HOTKEY_FOCUS_LEFT: return MoveFocusToLeft(window); break;
+        case HOTKEY_FOCUS_RIGHT: return MoveFocusToRight(window); break;
+        default: return false; break;
+    }
+    return false;
 }
