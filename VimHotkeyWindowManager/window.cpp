@@ -53,4 +53,3 @@ Window* FindWindowByHwnd(HWND hwnd) {
     }
     return nullptr; 
 }
-

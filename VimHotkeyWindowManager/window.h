@@ -31,9 +31,7 @@ struct Window {
     Window* next_window = nullptr;
     Window* prev_window = nullptr;
 
-    Window(HWND hwnd, Monitor* monitor) 
-        : hWnd(hwnd), monitor(monitor) {}
-
+    Window(HWND hwnd, Monitor* monitor);
 
     void SetNextWindow(Window* next);
     void SetPrevWindow(Window* prev);
