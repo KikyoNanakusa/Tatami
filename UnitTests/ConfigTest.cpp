@@ -29,6 +29,25 @@ TEST(ConfigTests, LoadValidConfig) {
     EXPECT_EQ(0x47, configMap[ACTION_WINDOW_MAXIMIZE]);   
 }
 
+TEST(ConfigTests, LoadComment) {
+	Config config;
+	std::string configString = 
+		"# This is a comment\n"
+		"MoveWindowLeft=H\n"
+		"   # This is another comment\n"
+        "       # tab\n"
+        "\n"
+        "    \n"
+		"MoveWindowDown=J\n";
+
+	bool result = config.loadConfig(configString);
+	
+	ASSERT_TRUE(result);
+
+	auto configMap = config.getConfigMap();
+	EXPECT_EQ(0x48, configMap[ACTION_MOVE_WINDOW_LEFT]);  
+	EXPECT_EQ(0x4A, configMap[ACTION_MOVE_WINDOW_DOWN]);  
+}
 TEST(ConfigTests, LoadInvalidConfig_MultipleCharactersInValue) {
     Config config;
     std::string configString = 

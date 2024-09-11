@@ -19,10 +19,10 @@ void RegisterHotKeys(HWND hWnd, Config* config) {
 		!RegisterHotKey(hWnd, HOTKEY_MINIMIZE, MOD_ALT | MOD_SHIFT, config->getConfigValue(ACTION_WINDOW_MINIMIZE)) ||
 		!RegisterHotKey(hWnd, HOTKEY_RESTORE, MOD_ALT | MOD_SHIFT, config->getConfigValue(ACTION_WINDOW_RESTORE)) ||
 		!RegisterHotKey(hWnd, HOTKEY_MAXIMIZE, MOD_ALT | MOD_SHIFT, config->getConfigValue(ACTION_WINDOW_MAXIMIZE)) ||
-		!RegisterHotKey(hWnd, HOTKEY_FOCUS_LEFT, MOD_ALT, getVkCodeFromChar('H')) ||
-		!RegisterHotKey(hWnd, HOTKEY_FOCUS_DOWN, MOD_ALT, getVkCodeFromChar('J')) ||
-		!RegisterHotKey(hWnd, HOTKEY_FOCUS_UP, MOD_ALT, getVkCodeFromChar('K')) ||
-		!RegisterHotKey(hWnd, HOTKEY_FOCUS_RIGHT, MOD_ALT, getVkCodeFromChar('L')) 
+		!RegisterHotKey(hWnd, HOTKEY_FOCUS_LEFT, MOD_ALT, config->getConfigValue(ACTION_MOVE_FOCUS_LEFT)) ||
+		!RegisterHotKey(hWnd, HOTKEY_FOCUS_DOWN, MOD_ALT, config->getConfigValue(ACTION_MOVE_FOCUS_DOWN)) ||
+		!RegisterHotKey(hWnd, HOTKEY_FOCUS_UP, MOD_ALT, config->getConfigValue(ACTION_MOVE_FOCUS_UP)) ||
+		!RegisterHotKey(hWnd, HOTKEY_FOCUS_RIGHT, MOD_ALT, config->getConfigValue(ACTION_MOVE_FOCUS_RIGHT)) 
 		)
 	{
 		

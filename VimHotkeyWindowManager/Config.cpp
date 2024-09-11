@@ -35,6 +35,11 @@ bool Config::parseLine(const std::string& line) {
     std::istringstream lineStream(line);
     std::string key, value;
 
+    // Check if the line is empty or a comment
+    if (isWhitespaceOnly(line) || trim(line)[0] == '#') {
+		return true;
+	}
+
 
     if (std::getline(lineStream, key, '=') && std::getline(lineStream, value)) {
         key = trim(key);
@@ -69,6 +74,14 @@ bool Config::setConfigValue(const std::string& key, char value) {
         configMap[ACTION_WINDOW_RESTORE] = vkCode;
     } else if (key == "MaximizeWindow") {
         configMap[ACTION_WINDOW_MAXIMIZE] = vkCode;
+    } else if (key == "MoveFocusLeft") {
+		configMap[ACTION_MOVE_FOCUS_LEFT] = vkCode;
+	} else if (key == "MoveFocusDown") {
+		configMap[ACTION_MOVE_FOCUS_DOWN] = vkCode;
+	} else if (key == "MoveFocusUp") {
+		configMap[ACTION_MOVE_FOCUS_UP] = vkCode;
+	} else if (key == "MoveFocusRight") {
+		configMap[ACTION_MOVE_FOCUS_RIGHT] = vkCode;
     } else {
         std::cerr << "Unknown key: " << key << std::endl;
         return false;
