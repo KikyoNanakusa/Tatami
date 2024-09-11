@@ -29,14 +29,22 @@ enum Action {
 	ACTION_MOVE_WINDOW_RIGHT,
 	ACTION_WINDOW_MINIMIZE,
 	ACTION_WINDOW_RESTORE,
-	ACTION_WINDOW_MAXIMIZE
+	ACTION_WINDOW_MAXIMIZE,
+	ACTION_MOVE_FOCUS_LEFT,
+	ACTION_MOVE_FOCUS_RIGHT,
+	ACTION_MOVE_FOCUS_UP,
+	ACTION_MOVE_FOCUS_DOWN,
 };
 
 // Default configuration text
 const std::string DefaultConfig = "MoveWindowLeft=H\n"
-								  "MoveWindowDown=J\n"
-								  "MoveWindowUp=K\n"
-								  "MoveWindowRight=L\n"
-								  "MinimizeWindow=D\n"
-								  "RestoreWindow=U\n"
-								  "MaximizeWindow=G\n";		
+		"MoveWindowDown=J\n"
+		"MoveWindowUp=K\n"
+		"MoveWindowRight=L\n"
+		"MinimizeWindow=D\n"
+		"RestoreWindow=U\n"
+		"MaximizeWindow=G\n"
+		"MoveFocusLeft=H\n"
+		"MoveFocusDown=J\n"
+		"MoveFocusUp=K\n"
+		"MoveFocusRight=L\n";

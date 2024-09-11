@@ -27,6 +27,7 @@ struct Window {
     HorizontalAlignment horizontal_alignment = HA_FREE;
     VerticalAlignment vertical_alignment = VA_FREE;
     bool isMaximized = false;
+    bool isMinimized = false;
 
     Window* next_window = nullptr;
     Window* prev_window = nullptr;

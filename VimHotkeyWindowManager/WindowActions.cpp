@@ -324,15 +324,38 @@ bool MoveFocusedWindow(int moveType, HWND& lastMinimizedWindow) {
 bool MoveFocusToLeft(Window* window) {
     if (window->isMaximized) return false;
 
-    if (window->monitor->left_window == nullptr) return false;
-    return SetForegroundWindow(window->monitor->left_window->hWnd);
+    // If the window is in the top left corner, move the focus to the top right window
+	if (window->monitor->top_left_window) {
+		return SetForegroundWhenRestored(window->monitor->top_left_window);
+	}
+	else if (window->monitor->bottom_left_window) {
+		return SetForegroundWhenRestored(window->monitor->bottom_left_window);
+	}
+
+    // if no window is in the left side of the monitor, return false
+    if (window->monitor->left_window == nullptr)
+    {
+        return false;
+    }
+
+    return SetForegroundWhenRestored(window->monitor->left_window);
 }
 
 bool MoveFocusToRight(Window* window) {
     if (window->isMaximized) return false; 
 
-    if (window->monitor->left_window == nullptr) return false;
-	return SetForegroundWindow(window->monitor->right_window->hWnd);
+    // If the window is in the top right corner, move the focus to the top left window
+    if (window->monitor->top_right_window) {
+        SetForegroundWhenRestored(window->monitor->top_right_window);
+    }
+    else if (window->monitor->bottom_right_window) {
+		SetForegroundWhenRestored(window->monitor->bottom_right_window);
+	}
+
+    // if no window is in the right side of the monitor, return false
+    if (window->monitor->right_window == nullptr) return false;
+
+	return SetForegroundWhenRestored(window->monitor->right_window);
 }
 
 bool MoveFocusToUp(Window* window) {
@@ -340,11 +363,11 @@ bool MoveFocusToUp(Window* window) {
 
     if (window->monitor->bottom_left_window == window) {
 		if (window->monitor->top_left_window == nullptr) return false;
-		return SetForegroundWindow(window->monitor->top_left_window->hWnd);
+		return SetForegroundWhenRestored(window->monitor->top_left_window);
 	}
 
     if (window->monitor->top_window == nullptr) return false;
-	return SetForegroundWindow(window->monitor->top_window->hWnd);
+	return SetForegroundWhenRestored(window->monitor->top_window);
 }
 
 bool MoveFocusToDown(Window* window) {
@@ -352,11 +375,11 @@ bool MoveFocusToDown(Window* window) {
 
     if (window->monitor->top_left_window == window) {
         if (window->monitor->bottom_left_window == nullptr) return false;
-        return SetForegroundWindow(window->monitor->bottom_left_window->hWnd);
+        return SetForegroundWhenRestored(window->monitor->bottom_left_window);
     }
 
     if (window->monitor->bottom_window == nullptr) return false;
-	return SetForegroundWindow(window->monitor->bottom_window->hWnd);
+	return SetForegroundWhenRestored(window->monitor->bottom_window);
 }
 
 bool MoveFocus(UINT moveType) {
