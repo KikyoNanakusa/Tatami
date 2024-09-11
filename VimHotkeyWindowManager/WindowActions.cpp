@@ -324,14 +324,37 @@ bool MoveFocusedWindow(int moveType, HWND& lastMinimizedWindow) {
 bool MoveFocusToLeft(Window* window) {
     if (window->isMaximized) return false;
 
-    if (window->monitor->left_window == nullptr) return false;
+    // If the window is in the top left corner, move the focus to the top right window
+	if (window->monitor->top_left_window) {
+		return SetForegroundWindow(window->monitor->top_left_window->hWnd);
+	}
+	else if (window->monitor->bottom_left_window) {
+		return SetForegroundWindow(window->monitor->bottom_left_window->hWnd);
+	}
+
+    // if no window is in the left side of the monitor, return false
+    if (window->monitor->left_window == nullptr)
+    {
+        return false;
+    }
+
     return SetForegroundWindow(window->monitor->left_window->hWnd);
 }
 
 bool MoveFocusToRight(Window* window) {
     if (window->isMaximized) return false; 
 
+    // If the window is in the top right corner, move the focus to the top left window
+    if (window->monitor->top_right_window) {
+        SetForegroundWindow(window->monitor->top_right_window->hWnd);
+    }
+    else if (window->monitor->bottom_right_window) {
+		SetForegroundWindow(window->monitor->bottom_right_window->hWnd);
+	}
+
+    // if no window is in the right side of the monitor, return false
     if (window->monitor->left_window == nullptr) return false;
+
 	return SetForegroundWindow(window->monitor->right_window->hWnd);
 }
 
