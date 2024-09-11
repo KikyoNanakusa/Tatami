@@ -45,7 +45,6 @@ struct MinimizedWindow {
 
     MinimizedWindow(Window* window);
     void SetNextWindow(MinimizedWindow* next);
-    void SetPrevWindow(MinimizedWindow* prev);
 };
 
 // Used in global scope

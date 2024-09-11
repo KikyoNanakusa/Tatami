@@ -41,14 +41,6 @@ void MinimizedWindow::SetNextWindow(MinimizedWindow* next) {
 	}
 }
 
-// Set the previous minimized window of the current minimized window
-void MinimizedWindow::SetPrevWindow(MinimizedWindow* prev) {
-	prev_window = prev;
-	if (prev) {
-		prev->next_window = this;
-	}
-}
-
 // Helper functions 
 
 // Add the window to the global list by the HWND and the Monitor
