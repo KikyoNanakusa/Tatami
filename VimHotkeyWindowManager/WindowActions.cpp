@@ -175,6 +175,7 @@ bool MoveWindowToLeft(Window *window, const RECT& windowRect) {
     // Set the horizontal alignment to left if the window is moved to the left
     if (ret) {
 		window->horizontal_alignment = HA_LEFT;
+        window->monitor->UnmapWindow(window);
         window->monitor->left_window = window;
 	}
 
@@ -205,6 +206,7 @@ bool MoveWindowToRight(Window *window, const RECT& windowRect) {
 
     if (ret) {
         window->horizontal_alignment = HA_RIGHT;
+        window->monitor->UnmapWindow(window);
         window->monitor->right_window = window;
     }
 
@@ -226,13 +228,17 @@ bool MoveWindowToDown(Window *window, const RECT& windowRect) {
 
     if (ret) {
 		window->vertical_alignment = VA_BOTTOM;
-        if (window->monitor->left_window == window) {
+
+        if (window->monitor->left_window == window || window->monitor->top_left_window == window) {
+            window->monitor->UnmapWindow(window);
 			window->monitor->bottom_left_window = window;
         }
-        else if (window->monitor->right_window == window) {
+        else if (window->monitor->right_window == window || window->monitor->top_right_window == window) {
+            window->monitor->UnmapWindow(window);
             window->monitor->bottom_right_window = window;
         }
         else {
+            window->monitor->UnmapWindow(window);
             window->monitor->bottom_window = window;
         }
 	}
@@ -255,12 +261,16 @@ bool MoveWindowToUp(Window *window, const RECT& windowRect) {
 
     if (ret) {
         window->vertical_alignment = VA_TOP;
-        if (window->monitor->left_window == window) {
+
+        if (window->monitor->left_window == window || window->monitor->bottom_left_window == window) {
+            window->monitor->UnmapWindow(window);
             window->monitor->top_left_window = window;
-		} else if (window->monitor->right_window == window) {
+		} else if (window->monitor->right_window == window || window->monitor->bottom_right_window == window) {
+            window->monitor->UnmapWindow(window);
 			window->monitor->top_right_window = window;
         }
         else {
+            window->monitor->UnmapWindow(window);
             window->monitor->top_window = window;
         }
     }
@@ -324,38 +334,65 @@ bool MoveFocusedWindow(int moveType, HWND& lastMinimizedWindow) {
 bool MoveFocusToLeft(Window* window) {
     if (window->isMaximized) return false;
 
-    // If the window is in the top left corner, move the focus to the top right window
-	if (window->monitor->top_left_window) {
+    if (window->monitor->top_right_window == window && window->monitor->top_left_window) {
+        SetCursorToTopLeft(window->monitor);
 		return SetForegroundWhenRestored(window->monitor->top_left_window);
 	}
-	else if (window->monitor->bottom_left_window) {
+
+    if (window->monitor->bottom_right_window == window && window->monitor->bottom_left_window) {
+        SetCursorToBottomLeft(window->monitor);
+		return SetForegroundWhenRestored(window->monitor->bottom_left_window);
+    }
+
+    if (window->monitor->left_window) {
+		SetCursorToLeft(window->monitor);
+        return SetForegroundWhenRestored(window->monitor->left_window);
+    }
+
+	if (window->monitor->top_left_window) {
+        SetCursorToTopLeft(window->monitor);
+		return SetForegroundWhenRestored(window->monitor->top_left_window);
+	}
+
+	if (window->monitor->bottom_left_window) {
+        SetCursorToBottomLeft(window->monitor);
 		return SetForegroundWhenRestored(window->monitor->bottom_left_window);
 	}
 
-    // if no window is in the left side of the monitor, return false
-    if (window->monitor->left_window == nullptr)
-    {
-        return false;
-    }
-
-    return SetForegroundWhenRestored(window->monitor->left_window);
+    return false;
 }
 
 bool MoveFocusToRight(Window* window) {
     if (window->isMaximized) return false; 
 
-    // If the window is in the top right corner, move the focus to the top left window
-    if (window->monitor->top_right_window) {
-        SetForegroundWhenRestored(window->monitor->top_right_window);
+    // If the window is in the top left corner, move the focus to the top right window
+    if (window->monitor->top_left_window == window && window->monitor->top_right_window) {
+        SetCursorToTopRight(window->monitor);
+        return SetForegroundWhenRestored(window->monitor->top_right_window);
     }
-    else if (window->monitor->bottom_right_window) {
-		SetForegroundWhenRestored(window->monitor->bottom_right_window);
+
+    // If the window is in the bottom right corner, move the focus to the bottom left window
+    if (window->monitor->bottom_right_window == window && window->monitor->bottom_right_window) {
+        SetCursorToBottomRight(window->monitor);
+		return SetForegroundWhenRestored(window->monitor->bottom_right_window);
 	}
 
-    // if no window is in the right side of the monitor, return false
-    if (window->monitor->right_window == nullptr) return false;
+    if (window->monitor->right_window) {
+		SetCursorToRight(window->monitor);
+		return SetForegroundWhenRestored(window->monitor->right_window);
+	}
 
-	return SetForegroundWhenRestored(window->monitor->right_window);
+    if (window->monitor->top_right_window) {
+        SetCursorToTopRight(window->monitor);
+		return SetForegroundWhenRestored(window->monitor->top_right_window);
+    }
+    
+    if (window->monitor->bottom_right_window) {
+        SetCursorToBottomRight(window->monitor);
+		return SetForegroundWhenRestored(window->monitor->bottom_right_window);
+    }
+
+    return false;
 }
 
 bool MoveFocusToUp(Window* window) {
