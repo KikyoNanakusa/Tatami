@@ -38,9 +38,22 @@ struct Window {
     void SetPrevWindow(Window* prev);
 };
 
+struct MinimizedWindow {
+    Window* window;
+    MinimizedWindow *next_window = nullptr;
+    MinimizedWindow *prev_window = nullptr;
+
+    MinimizedWindow(Window* window);
+    void SetNextWindow(MinimizedWindow* next);
+    void SetPrevWindow(MinimizedWindow* prev);
+};
+
 // Used in global scope
 extern Window *head_window;
+extern MinimizedWindow *head_minimized_window;
 
 bool AddWindowToList(HWND hWnd, Monitor* monitor);
+bool PushMinimizedWindowToList(Window* window);
+MinimizedWindow* PopMinimizedWindow();
 Window* FindWindowByHwnd(HWND hwnd);
 

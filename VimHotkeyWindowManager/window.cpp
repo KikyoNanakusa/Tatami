@@ -2,6 +2,7 @@
 
 // Global Lists of Monitors and Windows
 Window *head_window = nullptr;
+MinimizedWindow *head_minimized_window = nullptr;
 
 
 // Constructor of the Window struct
@@ -26,6 +27,28 @@ void Window::SetPrevWindow(Window* prev) {
 }
 
 
+// Constructor of the MinimizedWindow struct
+// Initialize the minimized window with the Window
+MinimizedWindow::MinimizedWindow(Window* window)
+	: window(window) {}
+	
+
+// Set the next minimized window of the current minimized window
+void MinimizedWindow::SetNextWindow(MinimizedWindow* next) {
+	next_window = next;
+	if (next) {
+		next->prev_window = this;
+	}
+}
+
+// Set the previous minimized window of the current minimized window
+void MinimizedWindow::SetPrevWindow(MinimizedWindow* prev) {
+	prev_window = prev;
+	if (prev) {
+		prev->next_window = this;
+	}
+}
+
 // Helper functions 
 
 // Add the window to the global list by the HWND and the Monitor
@@ -38,6 +61,27 @@ bool AddWindowToList(HWND hWnd, Monitor* monitor) {
 	}
 
 	return true;
+}
+
+// Push the minimized window to the global list
+bool PushMinimizedWindowToList(Window *window) {
+	MinimizedWindow *current = head_minimized_window;
+	head_minimized_window = new MinimizedWindow(window);
+	if (current != nullptr) {
+		head_minimized_window->SetNextWindow(current);
+	}
+
+	return true;
+}
+
+// Pop the minimized window from the global list
+MinimizedWindow *PopMinimizedWindow() {
+	MinimizedWindow *current = head_minimized_window;
+	if (current != nullptr) {
+		head_minimized_window = current->next_window;
+		return current;
+	}
+	return nullptr;
 }
 
 // Find the window in the global list by the HWND
@@ -53,3 +97,4 @@ Window* FindWindowByHwnd(HWND hwnd) {
     }
     return nullptr; 
 }
+
