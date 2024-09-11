@@ -135,6 +135,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Config.cpp" />
+    <ClCompile Include="FocusUtils.cpp" />
     <ClCompile Include="HotkeyManager.cpp" />
     <ClCompile Include="KeyUtils.cpp" />
     <ClCompile Include="main.cpp" />
@@ -150,6 +151,7 @@
     <ClInclude Include="Config.h" />
     <ClInclude Include="ConfigReader.h" />
     <ClInclude Include="definition.h" />
+    <ClInclude Include="FocusUtils.h" />
     <ClInclude Include="HotkeyManager.h" />
     <ClInclude Include="KeyUtils.h" />
     <ClInclude Include="Monitor.h" />

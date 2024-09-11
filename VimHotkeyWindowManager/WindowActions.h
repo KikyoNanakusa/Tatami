@@ -5,6 +5,7 @@
 #include "MonitorUtils.h"
 #include "Window.h"
 #include "Monitor.h"
+#include "FocusUtils.h"
 
 #pragma comment(lib, "Shcore.lib")
 
