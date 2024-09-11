@@ -12,6 +12,13 @@ bool OnDestroy(HWND hWnd, NOTIFYICONDATA nid, HMENU hMenu)
 	UnregisterHotKey(hWnd, HOTKEY_MINIMIZE);
 	UnregisterHotKey(hWnd, HOTKEY_RESTORE);
 
+	MinimizedWindow* current_minimized_window = head_minimized_window;
+	while (current_minimized_window) {
+		MinimizedWindow* next_minimized_window = current_minimized_window->next_window;
+		delete current_minimized_window;
+		current_minimized_window = next_minimized_window;
+	}
+
 	// Destroy monitor list
 	Monitor* current = primary_monitor;
 	while (current) {
@@ -27,6 +34,7 @@ bool OnDestroy(HWND hWnd, NOTIFYICONDATA nid, HMENU hMenu)
 		delete current_window;
 		current_window = next_window;
 	}
+
 
 	// Destroy window ( tasktray icon )
 	DestroyWindow(hWnd);

@@ -29,20 +29,24 @@ Window* EnsureWindowMonitorTracking(HWND hWnd = nullptr) {
     return window;
 }
 
-bool MinimizeWindow(Window *window, HWND& minimizedWindow) {
-    minimizedWindow = window->hWnd;
+bool MinimizeWindow(Window *window) {
     BOOL ret = ShowWindow(window->hWnd, SW_MINIMIZE);
     if (ret) {
 		window->monitor->UnmapWindow(window);
+        window->isMinimized = true;
+        PushMinimizedWindowToList(window);
 	}
 
     return (bool)ret;
 }
 
-bool RestoreWindow(HWND& minimizedWindow) {
-    if (minimizedWindow == NULL) return false;
-    bool ret = ShowWindow(minimizedWindow, SW_RESTORE);
-    minimizedWindow = NULL;
+bool RestoreWindow() {
+    MinimizedWindow *minimizedWindow = PopMinimizedWindow();
+    if (minimizedWindow == nullptr) return false;
+    bool ret = ShowWindow(minimizedWindow->window->hWnd, SW_RESTORE);
+    if (ret) {
+        minimizedWindow->window->isMinimized = false;
+    }
     return ret;
 }
 
@@ -99,9 +103,12 @@ bool MoveWindowToOtherMonitor(Window *window, const RECT& windowRect, bool isMov
     );
 
     if (ret) {
+        window->monitor->UnmapWindow(window);
+
 		window->monitor = targetMonitor;
-        window->horizontal_alignment = HA_FREE;
-        window->vertical_alignment = VA_FREE;
+        window->horizontal_alignment = HA_LEFT;
+        window->vertical_alignment = VA_MAXIMIZE;
+        window->monitor->left_window = window;
 	}
 	return ret;
 }
@@ -308,9 +315,9 @@ bool MoveFocusedWindow(int moveType, HWND& lastMinimizedWindow) {
     if (window == nullptr) return false;
 
     if (moveType == HOTKEY_MINIMIZE) {
-        return MinimizeWindow(window, lastMinimizedWindow);
+        return MinimizeWindow(window);
     } else if (moveType == HOTKEY_RESTORE) {
-        return RestoreWindow(lastMinimizedWindow);
+        return RestoreWindow();
     } else if (moveType == HOTKEY_MAXIMIZE) {
         // ウィンドウを最大化
 		ShowWindow(hWnd, SW_MAXIMIZE);
